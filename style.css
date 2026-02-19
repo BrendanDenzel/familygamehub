@@ -208,3 +208,20 @@ button:hover {
   opacity: 1;
 }
 
+/* MOBILE SCALING */
+@media (max-width: 600px) {
+  .page-wrapper {
+    transform: scale(2);             /* scale everything 2x */
+    transform-origin: top center;    /* scale from top center */
+    width: 100vw;                    /* fit the viewport width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  body {
+    overflow-x: hidden; /* prevent horizontal scroll */
+  }
+}
+
+
