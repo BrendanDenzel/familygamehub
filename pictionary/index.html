@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pictionary - Drawing Board</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="/index.html" class="nav-left">PICTIONARY</a>
+  <div class="nav-right">
+    <a href="index.html" class="active">Board</a>
+    <a href="word-generator.html">Word Generator</a>
+  </div>
+</nav>
+
+<div id="timeUpNotification">Time's Up!</div>
+
+
+<div class="game-container">
+
+  <div class="canvas-panel">
+    <canvas id="drawingBoard"></canvas>
+  </div>
+
+ <div class="controls-panel">
+
+  <div class="tool-toggle">
+    <button id="drawBtn" class="activeTool">Draw</button>
+    <button id="eraserBtn">Eraser</button>
+  </div>
+
+  <button id="clearBtn">Clear</button>
+
+  <div class="tool-section">
+    <label>Brush Size</label>
+    <input type="range" id="brushSize" min="2" max="25" value="5">
+  </div>
+
+  <div class="tool-section">
+    <label>Color</label>
+    <input type="color" id="colorPicker" value="#ffffff">
+  </div>
+
+  <div class="timer-section">
+    <div id="timerDisplay">90</div>
+  </div>
+
+    <button id="resetBoardBtn" class="reset-board-btn">
+    RESET BOARD
+  </button>
+
+</div>
+
+
+
+
+
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
