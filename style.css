@@ -5,6 +5,14 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
+html, body {
+  overflow: hidden;  /* prevents all scrolling */
+  height: 100%;      /* ensures body fills viewport */
+  width: 100%;
+  touch-action: none; /* prevents touch gestures from scrolling on mobile */
+}
+
+
 body {
   background: #111;
   color: white;
