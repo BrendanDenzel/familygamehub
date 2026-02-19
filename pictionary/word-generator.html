@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pictionary - Word Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+<nav class="top-nav">
+  <div class="nav-left">Pictionary</div>
+  <div class="nav-right">
+    <a href="index.html">Board</a>
+    <a href="word-generator.html" class="active">Word Generator</a>
+  </div>
+</nav>
+
+<div class="word-page">
+  <div class="word-box">
+
+    <div class="difficulty-buttons">
+      <button class="difficulty active" data-level="easy">Easy</button>
+      <button class="difficulty" data-level="medium">Medium</button>
+      <button class="difficulty" data-level="hard">Hard</button>
+    </div>
+
+    <div id="wordDisplay">READY?</div>
+
+    <button id="newWordBtn">Generate Word</button>
+
+  </div>
+</div>
+</div>
+
+<script src="word-generator.js"></script>
+</body>
+</html>
