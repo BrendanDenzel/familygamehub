@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Imposter Word</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="top-nav">
+      <a href="/index.html" class="nav-left">IMPOSTER</a>
+      <div class="nav-right">
+        <a href="#" class="active" id="navStatus">Lobby</a>
+      </div>
+    </div>
+
+    <main class="page">
+      <!-- HOME -->
+      <section class="card" id="homeView">
+        <h1 class="title">Imposter Word</h1>
+        <p class="sub">Create a party on one device (host), others join with the code.</p>
+
+        <div class="grid2">
+          <div class="panel">
+            <h2 class="h2">Create Party</h2>
+            <label class="label">Your name</label>
+            <input class="input" id="hostName" placeholder="Host name" maxlength="20" />
+            <button class="btn primary" id="createPartyBtn">Create Party</button>
+            <p class="hint">You’ll get a party code to share.</p>
+          </div>
+
+          <div class="panel">
+            <h2 class="h2">Join Party</h2>
+            <label class="label">Party code</label>
+            <input class="input" id="joinCode" placeholder="ABCDE" maxlength="6" />
+            <label class="label">Your name</label>
+            <input class="input" id="joinName" placeholder="Player name" maxlength="20" />
+            <button class="btn" id="joinPartyBtn">Join Party</button>
+            <p class="hint">Enter the code from the host.</p>
+          </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+      </section>
+
+      <!-- LOBBY -->
+      <section class="card hidden" id="lobbyView">
+        <div class="row between wrap">
+          <div>
+            <h2 class="h2">Party Lobby</h2>
+            <p class="sub2">Code: <span class="code" id="partyCodeText">-----</span></p>
+          </div>
+          <div class="row gap">
+            <button class="btn" id="copyCodeBtn">Copy Code</button>
+            <button class="btn danger" id="leaveBtn">Leave</button>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="panel">
+            <h3 class="h3">Players</h3>
+            <div class="players" id="playersList"></div>
+          </div>
+
+          <div class="panel" id="hostPanel">
+            <h3 class="h3">Host Controls</h3>
+
+            <label class="label">Timer (optional UI only)</label>
+            <div class="row gap">
+              <input class="input" id="timerInput" type="number" min="10" max="300" value="60" />
+              <span class="pill">seconds</span>
+            </div>
+
+            <div class="row gap wrap">
+              <button class="btn primary" id="startGameBtn">Start Game</button>
+              <button class="btn danger" id="resetPartyBtn">Reset Round</button>
+            </div>
+
+            <p class="hint">
+              Start assigns 1 imposter and picks a random first player. Results reveals imposter name to everyone.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- GAME -->
+      <section class="word-page hidden" id="gameView">
+        <div class="word-box">
+          <div class="tag" id="roleTag">ROLE</div>
+          <div id="wordDisplay">---</div>
+
+          <div class="bigRow">
+            <div class="mini">
+              <div class="miniLabel">First Player</div>
+              <div class="miniValue" id="firstPlayerName">---</div>
+            </div>
+
+            <div class="mini">
+              <div class="miniLabel">Timer</div>
+              <div class="miniValue" id="timerDisplay">60</div>
+            </div>
+          </div>
+
+          <div class="revealBox hidden" id="revealBox">
+            <div class="revealTitle">IMPOSTER WAS</div>
+            <div class="revealName" id="imposterNameReveal">---</div>
+          </div>
+
+          <p class="hint center" id="gameHint">
+            Don’t say the word out loud. Discuss, draw, or play however you want — host reveals the imposter when ready.
+          </p>
+
+          <div class="row center gap">
+            <button class="btn" id="showResultsBtn" disabled>Reveal Imposter</button>
+            <button class="btn" id="backToLobbyBtn">Back to Lobby</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Firebase (modular SDK) -->
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
