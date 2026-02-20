@@ -278,13 +278,13 @@ button:active {
 /* ============================= */
 
 /* Trigger when the screen is short (typical phone landscape) OR true landscape */
-@media (hover: none) and (pointer: coarse) {
+@media (max-width: 900px) and (orientation: portrait) {
 
   /* turn 2-column layout into 2-row layout */
   .game-container {
     grid-template-columns: 1fr !important;
     grid-template-rows: 1fr auto !important; /* canvas on top, controls bottom */
-    height: calc(100vh - 60px);
+    height: calc(100vh - 40px);
   }
 
   /* remove the sidebar look */
@@ -292,7 +292,7 @@ button:active {
     border-left: none;
     border-top: 1px solid rgba(255,255,255,0.08);
     padding: 12px 14px;
-    gap: 12px;
+    gap: 8px !important;
 
     /* horizontal bar */
     flex-direction: row;
@@ -333,6 +333,7 @@ button:active {
     margin-top: 0;
     transform: none;
     padding: 10px 12px;
+    margin-bottom: 20px;
     border-radius: 12px;
     box-shadow: 0 6px 18px rgba(239,68,68,0.30);
   }
@@ -354,7 +355,14 @@ button:active {
 /* PHONE PORTRAIT ONLY: make bottom bar bigger */
 /* ============================= */
 
-@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+@media (max-width: 900px) and (orientation: portrait) {
+
+#timerDisplay {
+    padding: 10px 20px;
+    font-size: 28px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
 
   .controls-panel {
     padding: 20px 18px;
@@ -396,7 +404,7 @@ button:active {
 /* PHONE LANDSCAPE ONLY — make bottom bar smaller */
 /* ============================= */
 
-@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+@media (max-width: 900px) and (orientation: landscape) {
 
   .controls-panel {
     padding: 8px 10px !important;
@@ -442,7 +450,7 @@ button:active {
 /* SHORTEN NAV TEXT ON PHONE PORTRAIT */
 /* ============================= */
 
-@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+@media (max-width: 900px) and (orientation: portrait) {
 
 /* Force nav links to stay horizontal */
 .nav-right {
@@ -485,7 +493,7 @@ button:active {
 /* Paste at the BOTTOM */
 /* ============================= */
 
-@media (pointer: coarse), (hover: none), (max-width: 900px) {
+@media (max-width: 900px) {
   /* reduce huge top padding / center spacing */
   .page,
   .word-page,
@@ -535,22 +543,13 @@ button:active {
     width: 100% !important;
     max-width: 320px !important;
   }
-
-  /* stop “full viewport height” sections causing weird centering */
-  .word-page,
-  .page {
-    height: auto !important;
-    min-height: calc(100vh - 60px) !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-  }
 }
 
 /* ============================= */
 /* CENTER WHOLE BOX ON MOBILE */
 /* ============================= */
 
-@media (pointer: coarse), (hover: none), (max-width: 900px) {
+@media (max-width: 900px) {
 
   /* main wrapper should center content */
   .page,
@@ -559,7 +558,7 @@ button:active {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    min-height: calc(100vh - 60px) !important;
+    min-height: calc(100svh - 40px) !important;
     padding: 16px !important;
   }
 
@@ -577,7 +576,7 @@ button:active {
 /* CENTER WHOLE BOX ON MOBILE */
 /* ============================= */
 
-@media (pointer: coarse), (hover: none), (max-width: 900px) {
+@media (max-width: 900px) {
 
   /* main wrapper should center content */
   .page,
@@ -603,8 +602,7 @@ button:active {
 /* ============================= */
 /* MOBILE LANDSCAPE: COMPACT MODE */
 /* ============================= */
-@media (pointer: coarse) and (orientation: landscape),
-       (max-width: 900px) and (orientation: landscape) {
+@media (max-width: 900px) and (orientation: landscape) {
 
   /* Less padding so it fits short height screens */
   .page,
@@ -647,20 +645,6 @@ button:active {
     padding: 10px 18px !important;
   }
 
-  /* keep everything on ONE LINE in phone landscape */
-.controls-panel {
-  flex-wrap: nowrap !important;     /* 🚫 no wrapping */
-  justify-content: center !important;
-  gap: 6px !important;              /* slightly tighter */
-  overflow-x: auto;                 /* if it ever can't fit, scroll instead of wrap */
-  -webkit-overflow-scrolling: touch;
-}
-
-/* prevent any tool-section from forcing a wrap */
-.tool-section {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
 
 /* make buttons slightly more compact */
 button {
@@ -685,11 +669,86 @@ button {
 /* ============================= */
 /* MOBILE NAV SPACING FIX */
 /* ============================= */
-@media (pointer: coarse), (hover: none), (max-width: 900px) {
+@media (max-width: 900px) {
 
   .top-nav {
     padding-left: 20px !important;  /* 👈 more space before logo */
     padding-right: 14px !important;
   }
 
+}
+
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+  .controls-panel{
+    flex-direction: row !important;
+    flex-wrap: wrap !important;     /* allow multiple rows */
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  /* Put color section and timer next to each other by ordering them */
+  .controls-panel > .tool-section:nth-of-type(2){ order: 40 !important; } /* color tool-section */
+  .controls-panel > .timer-section{ order: 41 !important; }
+
+  /* Make timer not vertical / not pushed */
+  .timer-section{
+    margin-top: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  /* compact color picker */
+  #colorPicker[type="color"]{
+    width: 40px !important;
+    height: 36px !important;
+    padding: 4px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    background: transparent !important;
+  }
+}
+
+
+
+/* Custom tooltip */
+.timer-section {
+  position: relative;
+}
+
+/* show tooltip on hover AND on keyboard focus */
+.timer-section:hover::after,
+.timer-section:focus-within::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 10px);  /* above */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #e2e8f0;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+  z-index: 2000;
+  pointer-events: none;
+}
+
+/* little arrow */
+.timer-section:hover::before,
+.timer-section:focus-within::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(15, 23, 42, 0.92);
+  z-index: 2000;
+  pointer-events: none;
 }
