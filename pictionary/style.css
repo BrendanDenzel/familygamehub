@@ -479,3 +479,217 @@ button:active {
   }
 
 }
+
+/* ============================= */
+/* WORD GENERATOR: MOBILE FIX */
+/* Paste at the BOTTOM */
+/* ============================= */
+
+@media (pointer: coarse), (hover: none), (max-width: 900px) {
+  /* reduce huge top padding / center spacing */
+  .page,
+  .word-page,
+  main {
+    padding: 16px !important;
+  }
+
+  /* if you have a big centered box like .word-box */
+  .word-box,
+  .card,
+  .panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 22px 18px !important;
+    border-radius: 18px !important;
+  }
+
+  /* reduce the giant READY text */
+  h1,
+  .title,
+  #wordDisplay,
+  .readyText {
+    font-size: 44px !important;
+    letter-spacing: 1px !important;
+    line-height: 1.05 !important;
+  }
+
+  /* difficulty row should wrap nicely */
+  .difficulty-buttons,
+  .tool-toggle {
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  /* buttons slightly smaller */
+  button,
+  .btn {
+    padding: 12px 14px !important;
+    font-size: 15px !important;
+    border-radius: 12px !important;
+  }
+
+  /* make the generate button not feel tiny */
+  .generateBtn,
+  #generateWordBtn {
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+
+  /* stop “full viewport height” sections causing weird centering */
+  .word-page,
+  .page {
+    height: auto !important;
+    min-height: calc(100vh - 60px) !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+  }
+}
+
+/* ============================= */
+/* CENTER WHOLE BOX ON MOBILE */
+/* ============================= */
+
+@media (pointer: coarse), (hover: none), (max-width: 900px) {
+
+  /* main wrapper should center content */
+  .page,
+  .word-page,
+  main {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: calc(100vh - 60px) !important;
+    padding: 16px !important;
+  }
+
+  /* keep the box nicely sized */
+  .word-box,
+  .card {
+    width: 100% !important;
+    max-width: 420px !important;
+    min-width: 0 !important;
+  }
+
+}
+
+/* ============================= */
+/* CENTER WHOLE BOX ON MOBILE */
+/* ============================= */
+
+@media (pointer: coarse), (hover: none), (max-width: 900px) {
+
+  /* main wrapper should center content */
+  .page,
+  .word-page,
+  main {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: calc(100vh - 60px) !important;
+    padding: 16px !important;
+  }
+
+  /* keep the box nicely sized */
+  .word-box,
+  .card {
+    width: 100% !important;
+    max-width: 420px !important;
+    min-width: 0 !important;
+  }
+
+}
+
+/* ============================= */
+/* MOBILE LANDSCAPE: COMPACT MODE */
+/* ============================= */
+@media (pointer: coarse) and (orientation: landscape),
+       (max-width: 900px) and (orientation: landscape) {
+
+  /* Less padding so it fits short height screens */
+  .page,
+  .word-page,
+  main {
+    padding: 8px !important;
+    min-height: calc(100vh - 60px) !important;
+  }
+
+  /* Make the box shorter + narrower */
+  .word-box,
+  .card {
+    max-width: 560px !important;
+    width: min(560px, 96vw) !important;
+    padding: 18px !important;
+    min-height: 0 !important;
+  }
+
+  /* Shrink the big word/READY text */
+  #wordDisplay {
+    font-size: 46px !important;
+    margin: 10px 0 14px !important;
+  }
+
+  /* Tighten button rows */
+  .difficulty-buttons {
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+  }
+
+  /* If you have a timer on this page too */
+  #timerDisplay {
+    font-size: 34px !important;
+    padding: 10px 18px !important;
+  }
+
+  /* keep everything on ONE LINE in phone landscape */
+.controls-panel {
+  flex-wrap: nowrap !important;     /* 🚫 no wrapping */
+  justify-content: center !important;
+  gap: 6px !important;              /* slightly tighter */
+  overflow-x: auto;                 /* if it ever can't fit, scroll instead of wrap */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* prevent any tool-section from forcing a wrap */
+.tool-section {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* make buttons slightly more compact */
+button {
+  flex: 0 0 auto;
+  padding: 8px 9px !important;
+  font-size: 12.5px !important;
+}
+
+/* reset should stay inline, never centered on its own line */
+.reset-board-btn {
+  flex: 0 0 auto;
+  margin-left: 10px !important;
+  white-space: nowrap;
+}
+
+/* optional: hide scrollbar for a cleaner look */
+.controls-panel::-webkit-scrollbar {
+  height: 0;
+}
+}
+
+/* ============================= */
+/* MOBILE NAV SPACING FIX */
+/* ============================= */
+@media (pointer: coarse), (hover: none), (max-width: 900px) {
+
+  .top-nav {
+    padding-left: 20px !important;  /* 👈 more space before logo */
+    padding-right: 14px !important;
+  }
+
+}
