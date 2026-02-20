@@ -407,3 +407,220 @@ body::before {
   from { transform: scale(0.985); opacity: 0.9; }
   to   { transform: scale(1); opacity: 1; }
 }
+
+
+
+
+
+/* ============================= */
+/* MOBILE + RESPONSIVE POLISH */
+/* Paste at the BOTTOM of your CSS */
+/* ============================= */
+
+/* Use dynamic viewport units on mobile so the "60px nav" math stays correct */
+:root {
+  --navH: 60px;
+}
+
+@supports (height: 100dvh) {
+  .page { height: calc(100dvh - var(--navH)); }
+  .word-page { height: calc(100dvh - var(--navH)); }
+}
+
+/* Let the content scroll on small screens (your html/body are overflow:hidden) */
+@media (max-width: 900px) {
+  html, body { overflow: hidden; }
+  .page, .word-page { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* Navbar: tighter padding + wrapping links */
+@media (max-width: 768px) {
+  .top-nav {
+    padding: 0 16px;
+    height: var(--navH);
+    gap: 10px;
+  }
+
+  .nav-left {
+    font-size: 18px;
+    letter-spacing: 0.8px;
+  }
+
+  .nav-right a {
+    margin-left: 0;
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+
+  .nav-right {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+/* Page card spacing */
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+    align-items: flex-start; /* avoids vertical squeeze */
+  }
+
+  .card {
+    width: 100%;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .title {
+    font-size: clamp(28px, 7vw, 40px);
+    line-height: 1.05;
+  }
+
+  .sub {
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+}
+
+/* Two-column grid -> one column on phones */
+@media (max-width: 820px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 16px;
+  }
+}
+
+/* Buttons + input tap targets */
+@media (max-width: 768px) {
+  .btn {
+    min-height: 44px; /* mobile tap target */
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+
+  .input {
+    min-height: 44px;
+    padding: 12px 14px;
+  }
+
+  .row.gap { gap: 8px; }
+}
+
+/* Host control row: stack buttons when cramped */
+@media (max-width: 520px) {
+  .row.gap.wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .row.gap.wrap .btn {
+    width: 100%;
+  }
+
+  .code {
+    display: inline-block;
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+}
+
+/* Players list: slightly tighter */
+@media (max-width: 520px) {
+  .player {
+    padding: 10px 10px;
+    border-radius: 12px;
+    gap: 10px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* WORD PAGE mobile fit */
+@media (max-width: 768px) {
+  .word-page {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .word-box {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 20px 16px;
+    border-radius: 18px;
+    backdrop-filter: blur(22px); /* big blur is heavy on phones */
+  }
+
+  #wordDisplay {
+    font-size: clamp(34px, 10vw, 60px);
+    margin: 18px 0 18px;
+    letter-spacing: 1px;
+  }
+
+  .wordCovered::before {
+    filter: blur(10px);
+  }
+
+  .wordCovered::after {
+    font-size: clamp(16px, 4.5vw, 24px);
+  }
+
+  .bigRow {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .mini {
+    min-width: 0;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .miniValue {
+    font-size: 16px;
+  }
+
+  .revealName {
+    font-size: clamp(24px, 7vw, 34px);
+  }
+}
+
+/* Extra-small phones */
+@media (max-width: 390px) {
+  .title { font-size: 28px; }
+  .h2 { font-size: 18px; }
+  .h3 { font-size: 16px; }
+
+  .word-box { padding: 18px 14px; }
+  #wordDisplay { font-size: 34px; }
+}
+
+/* Touch devices: remove hover lift (prevents weird “stuck hover” on iOS) */
+@media (hover: none) and (pointer: coarse) {
+  .btn:hover { transform: none; }
+  #wordDisplay:hover { transform: none; }
+}
+
+/* Safe areas for iPhone notch */
+@supports (padding: max(0px)) {
+  .top-nav {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .page, .word-page {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
