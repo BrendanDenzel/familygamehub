@@ -43,7 +43,6 @@
           </div>
         </div>
 
-        <div class="toast" id="toast"></div>
       </section>
 
       <!-- LOBBY -->
@@ -74,10 +73,12 @@
               <span class="pill">seconds</span>
             </div>
 
+          <div class="controlbuttons">
             <div class="row gap wrap">
               <button class="btn primary" id="startGameBtn">Start Game</button>
               <button class="btn danger" id="resetPartyBtn">Reset Round</button>
             </div>
+          </div>
 
             <p class="hint">
               Start assigns 1 imposter and picks a random first player. Results reveals imposter name to everyone.
@@ -120,6 +121,8 @@
         </div>
       </section>
     </main>
+
+    <div class="toast" id="toast"></div>
 
     <!-- Firebase (modular SDK) -->
     <script type="module" src="script.js"></script>
