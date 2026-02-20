@@ -271,3 +271,211 @@ button:active {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+/* ============================= */
+/* LANDSCAPE MODE: MOVE SIDEBAR TO BOTTOM */
+/* Paste at the BOTTOM of your CSS */
+/* ============================= */
+
+/* Trigger when the screen is short (typical phone landscape) OR true landscape */
+@media (hover: none) and (pointer: coarse) {
+
+  /* turn 2-column layout into 2-row layout */
+  .game-container {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr auto !important; /* canvas on top, controls bottom */
+    height: calc(100vh - 60px);
+  }
+
+  /* remove the sidebar look */
+  .controls-panel {
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 14px;
+    gap: 12px;
+
+    /* horizontal bar */
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+
+    /* “bottom bar” feel */
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(16px);
+  }
+
+  /* each tool section becomes a small horizontal group */
+  .tool-section {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* toggles can wrap but stay horizontal */
+  .tool-toggle {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* make controls compact so they fit in one bar */
+  button {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  /* reset button should NOT float upward in bar layout */
+  .reset-board-btn {
+    margin-top: 0;
+    transform: none;
+    padding: 10px 12px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(239,68,68,0.30);
+  }
+  .reset-board-btn:hover { transform: none; }
+  .reset-board-btn:active { transform: none; }
+
+  /* keep canvas as big as possible */
+  .canvas-panel {
+    min-height: 0;
+  }
+
+  canvas {
+    cursor: default; /* phones */
+  }
+}
+
+
+/* ============================= */
+/* PHONE PORTRAIT ONLY: make bottom bar bigger */
+/* ============================= */
+
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+
+  .controls-panel {
+    padding: 20px 18px;
+    gap: 18px;
+    min-height: 120px; /* makes the bar taller */
+  }
+
+  .tool-section {
+    padding: 12px 14px;
+    gap: 14px;
+  }
+
+  button {
+    padding: 14px 18px;
+    font-size: 16px;
+  }
+
+.controls-panel {
+  justify-content: center;   /* centers left → right */
+  align-items: center;       /* centers top → bottom */
+  text-align: center;
+}
+
+.controls-panel {
+  justify-content: center;   /* centers left → right */
+  align-items: center;       /* centers top → bottom */
+  text-align: center;
+}
+
+.reset-board-btn {
+  padding: 16px 22px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+}
+
+/* ============================= */
+/* PHONE LANDSCAPE ONLY — make bottom bar smaller */
+/* ============================= */
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+
+  .controls-panel {
+    padding: 8px 10px !important;
+    gap: 8px !important;
+    min-height: 70px; /* smaller bar height */
+  }
+
+  .tool-section {
+    padding: 6px 8px !important;
+    gap: 8px !important;
+  }
+
+  button {
+    padding: 8px 10px !important;
+    font-size: 13px !important;
+  }
+
+  .reset-board-btn {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+  }
+
+ .reset-board-btn {
+  margin-left: 20px;
+}
+
+#timerDisplay {
+    padding: 15px 30px;
+    font-size: 28px;
+    border-radius: 10px;
+  }
+
+  .controls-panel {
+    justify-content: center;   /* centers left → right */
+    align-items: center;       /* centers vertically */
+    text-align: center;
+  }
+
+}
+
+
+/* ============================= */
+/* SHORTEN NAV TEXT ON PHONE PORTRAIT */
+/* ============================= */
+
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+
+/* Force nav links to stay horizontal */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;          /* spacing between links */
+  flex-wrap: nowrap;  /* never stack */
+  white-space: nowrap;
+}
+
+/* If you keep gap, remove the margin-left spacing */
+.nav-right a {
+  margin-left: 0;
+}
+
+  .nav-right a[href*="word-generator"] {
+    font-size: 16px;
+  }
+
+  .nav-right a[href*="word-generator"]::after {
+    content: "Word Generator";
+  }
+
+  .nav-right a[href*="word-generator"] {
+    color: transparent;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .nav-right a[href*="word-generator"]::after {
+    position: absolute;
+    left: 0;
+    color: #e2e8f0;
+  }
+
+}
