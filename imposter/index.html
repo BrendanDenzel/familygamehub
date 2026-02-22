@@ -67,11 +67,63 @@
           <div class="panel" id="hostPanel">
             <h3 class="h3">Host Controls</h3>
 
-            <label class="label">Timer (optional UI only)</label>
-            <div class="row gap">
-              <input class="input" id="timerInput" type="number" min="10" max="300" value="60" />
-              <span class="pill">seconds</span>
-            </div>
+          <div class="switchRow">
+  <div>
+    <div class="switchTitle">Use Default Word Bank</div>
+    <div class="switchDesc">ON uses built-in words & hints. OFF lets you paste your own list.</div>
+  </div>
+
+  <label class="switch">
+    <input type="checkbox" id="useDefaultBankToggle" checked />
+    <span class="slider"></span>
+  </label>
+</div>
+
+<div class="switchStack">
+  <div class="switchRow">
+    <div>
+      <div class="switchTitle">Hint for Imposter</div>
+      <div class="switchDesc">If ON, the imposter sees a hint in-game.</div>
+    </div>
+
+    <label class="switch">
+      <input type="checkbox" id="hintToggle" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="switchRow">
+    <div>
+      <div class="switchTitle">Hint only if Imposter starts</div>
+      <div class="switchDesc">Locked unless “Hint for Imposter” is ON.</div>
+    </div>
+
+    <label class="switch">
+      <input type="checkbox" id="hintOnlyIfImposterStartsToggle" />
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+
+<div id="customBankWrap">
+  <label class="label">Word + Hint Bank (host only)</label>
+  <textarea
+    class="input textarea"
+    id="wordBankInput"
+    rows="8"
+    placeholder="One per line. Format:
+WORD | hint
+
+Examples:
+PIZZA | Italian food, slices, delivery
+ELEPHANT | Huge animal with a trunk
+SUBMARINE | Underwater vehicle"
+  ></textarea>
+
+  <p class="hint">
+    Only used when “Use Default Word Bank” is OFF.
+  </p>
+</div>
 
           <div class="controlbuttons">
             <div class="row gap wrap">
@@ -92,16 +144,16 @@
         <div class="word-box">
           <div class="tag" id="roleTag">ROLE</div>
           <div id="wordDisplay">---</div>
+          
+          <div class="imposterHint hidden" id="imposterHintBox">
+  <div class="imposterHintTitle">HINT</div>
+  <div class="imposterHintText" id="imposterHintText">---</div>
+</div>
 
           <div class="bigRow">
             <div class="mini">
               <div class="miniLabel">First Player</div>
               <div class="miniValue" id="firstPlayerName">---</div>
-            </div>
-
-            <div class="mini">
-              <div class="miniLabel">Timer</div>
-              <div class="miniValue" id="timerDisplay">60</div>
             </div>
           </div>
 

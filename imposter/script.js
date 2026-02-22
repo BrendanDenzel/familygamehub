@@ -42,9 +42,192 @@ const auth = getAuth(app);
 /* ================================
    WORDS (always random)
 ================================ */
-const WORDS = [
-  "ELEPHANT","PIZZA","SPACESHIP","SNOWMAN","VOLCANO","GUITAR",
-  "CASTLE","JELLYFISH","ROLLERCOASTER","DRAGON","SUNFLOWER","SUBMARINE"
+// Default built-in word bank (host can override via textarea)
+const WORD_BANK = [
+  { word: "APPLE", hint: "orchard" },
+{ word: "BANANA", hint: "tropical" },
+{ word: "PIZZA", hint: "delivery" },
+{ word: "BURGER", hint: "drive-thru" },
+{ word: "SPAGHETTI", hint: "sauce" },
+{ word: "SUSHI", hint: "chopsticks" },
+{ word: "PANCAKES", hint: "syrup" },
+{ word: "DONUT", hint: "sprinkles" },
+{ word: "CUPCAKE", hint: "frosting" },
+{ word: "POPCORN", hint: "movies" },
+
+{ word: "TOOTHBRUSH", hint: "morning" },
+{ word: "MIRROR", hint: "reflection" },
+{ word: "UMBRELLA", hint: "storm" },
+{ word: "BACKPACK", hint: "school" },
+{ word: "SUITCASE", hint: "airport" },
+{ word: "NOTEBOOK", hint: "spiral" },
+{ word: "PENCIL", hint: "eraser" },
+{ word: "LIGHTBULB", hint: "idea" },
+{ word: "HEADPHONES", hint: "playlist" },
+{ word: "BATTERY", hint: "power" },
+
+{ word: "MICROWAVE", hint: "leftovers" },
+{ word: "BLENDER", hint: "smoothie" },
+{ word: "VACUUM", hint: "carpet" },
+{ word: "KEYBOARD", hint: "typing" },
+{ word: "REMOTE", hint: "couch" },
+{ word: "CANDLE", hint: "birthday" },
+{ word: "SCISSORS", hint: "crafts" },
+{ word: "CLOCK", hint: "alarm" },
+{ word: "BACKPACK", hint: "locker" },
+{ word: "SUITCASE", hint: "vacation" },
+
+{ word: "SCHOOL", hint: "homework" },
+{ word: "HOSPITAL", hint: "emergency" },
+{ word: "AIRPORT", hint: "boarding" },
+{ word: "BEACH", hint: "waves" },
+{ word: "LIBRARY", hint: "quiet" },
+{ word: "RESTAURANT", hint: "menu" },
+{ word: "MUSEUM", hint: "history" },
+{ word: "PARK", hint: "playground" },
+{ word: "ZOO", hint: "exhibit" },
+{ word: "GYM", hint: "workout" },
+
+{ word: "HOTEL", hint: "check-in" },
+{ word: "BANK", hint: "deposit" },
+{ word: "FACTORY", hint: "assembly" },
+{ word: "STADIUM", hint: "crowd" },
+{ word: "SUPERMARKET", hint: "aisle" },
+{ word: "COURTROOM", hint: "judge" },
+{ word: "FIRE STATION", hint: "sirens" },
+{ word: "POLICE STATION", hint: "badge" },
+
+{ word: "ELEPHANT", hint: "safari" },
+{ word: "DOG", hint: "leash" },
+{ word: "CAT", hint: "purring" },
+{ word: "LION", hint: "pride" },
+{ word: "TIGER", hint: "stripes" },
+{ word: "GIRAFFE", hint: "tall" },
+{ word: "ZEBRA", hint: "patterns" },
+{ word: "MONKEY", hint: "jungle" },
+{ word: "SHARK", hint: "fins" },
+{ word: "DOLPHIN", hint: "echo" },
+
+{ word: "PENGUIN", hint: "ice" },
+{ word: "EAGLE", hint: "soaring" },
+{ word: "OWL", hint: "night" },
+{ word: "SNAKE", hint: "slither" },
+{ word: "FROG", hint: "pond" },
+{ word: "HORSE", hint: "stable" },
+{ word: "COW", hint: "pasture" },
+{ word: "PIG", hint: "mud" },
+{ word: "CHICKEN", hint: "coop" },
+{ word: "RABBIT", hint: "burrow" },
+
+{ word: "ROBOT", hint: "metal" },
+{ word: "SPACESHIP", hint: "launch" },
+{ word: "TIME", hint: "clock" },
+{ word: "SHADOW", hint: "light" },
+{ word: "DREAM", hint: "sleep" },
+{ word: "MAGNET", hint: "attract" },
+{ word: "INVISIBLE", hint: "hidden" },
+{ word: "SECRET", hint: "whisper" },
+{ word: "LUCK", hint: "chance" },
+{ word: "NOISE", hint: "loud" },
+
+{ word: "POWER", hint: "energy" },
+{ word: "SPEED", hint: "fast" },
+{ word: "BALANCE", hint: "steady" },
+{ word: "FREEDOM", hint: "choice" },
+{ word: "MEMORY", hint: "past" },
+{ word: "SURPRISE", hint: "unexpected" },
+{ word: "DANGER", hint: "warning" },
+{ word: "CHAOS", hint: "mess" },
+{ word: "TEAMWORK", hint: "together" },
+{ word: "VICTORY", hint: "celebration" },
+
+{ word: "ORANGE", hint: "citrus" },
+{ word: "STRAWBERRY", hint: "seeds" },
+{ word: "WATERMELON", hint: "summer" },
+{ word: "GRAPES", hint: "vine" },
+{ word: "LEMON", hint: "sour" },
+{ word: "CHERRY", hint: "pit" },
+{ word: "PEACH", hint: "fuzzy" },
+{ word: "PINEAPPLE", hint: "tropical" },
+{ word: "COCONUT", hint: "island" },
+{ word: "BLUEBERRY", hint: "muffin" },
+
+{ word: "SANDWICH", hint: "layers" },
+{ word: "TACO", hint: "shell" },
+{ word: "BURRITO", hint: "wrapped" },
+{ word: "FRIES", hint: "ketchup" },
+{ word: "STEAK", hint: "grill" },
+{ word: "OMELET", hint: "breakfast" },
+{ word: "SALAD", hint: "dressing" },
+{ word: "CEREAL", hint: "morning" },
+{ word: "MILKSHAKE", hint: "straw" },
+{ word: "COOKIES", hint: "baking" },
+
+{ word: "BED", hint: "sleep" },
+{ word: "PILLOW", hint: "soft" },
+{ word: "BLANKET", hint: "warm" },
+{ word: "LAMP", hint: "nightstand" },
+{ word: "CURTAINS", hint: "window" },
+{ word: "COUCH", hint: "living room" },
+{ word: "TABLE", hint: "dinner" },
+{ word: "CHAIR", hint: "sit" },
+{ word: "DOOR", hint: "knob" },
+{ word: "WINDOW", hint: "glass" },
+
+{ word: "SHOWER", hint: "steam" },
+{ word: "SOAP", hint: "bubbles" },
+{ word: "TOWEL", hint: "dry" },
+{ word: "COMB", hint: "hair" },
+{ word: "SHAMPOO", hint: "lather" },
+{ word: "RAZOR", hint: "shave" },
+{ word: "SINK", hint: "faucet" },
+{ word: "TOILET", hint: "flush" },
+{ word: "TOOTHPASTE", hint: "mint" },
+{ word: "BATH", hint: "tub" },
+
+{ word: "BICYCLE", hint: "pedal" },
+{ word: "CAR", hint: "drive" },
+{ word: "BUS", hint: "route" },
+{ word: "TRAIN", hint: "tracks" },
+{ word: "BOAT", hint: "dock" },
+{ word: "HELICOPTER", hint: "blades" },
+{ word: "SUBWAY", hint: "underground" },
+{ word: "TAXI", hint: "fare" },
+{ word: "MOTORCYCLE", hint: "helmet" },
+{ word: "SKATEBOARD", hint: "tricks" },
+
+{ word: "DESERT", hint: "sand" },
+{ word: "FOREST", hint: "trees" },
+{ word: "MOUNTAIN", hint: "peak" },
+{ word: "RIVER", hint: "flow" },
+{ word: "LAKE", hint: "shore" },
+{ word: "ISLAND", hint: "remote" },
+{ word: "CAVE", hint: "dark" },
+{ word: "VALLEY", hint: "low" },
+{ word: "WATERFALL", hint: "mist" },
+{ word: "GLACIER", hint: "ice" },
+
+{ word: "RAIN", hint: "clouds" },
+{ word: "SNOW", hint: "flakes" },
+{ word: "WIND", hint: "gust" },
+{ word: "LIGHTNING", hint: "storm" },
+{ word: "THUNDER", hint: "boom" },
+{ word: "RAINBOW", hint: "colors" },
+{ word: "FOG", hint: "visibility" },
+{ word: "HAIL", hint: "pellets" },
+{ word: "SUNSHINE", hint: "bright" },
+{ word: "BREEZE", hint: "cool" },
+
+{ word: "CAMERA", hint: "flash" },
+{ word: "PHONE", hint: "ring" },
+{ word: "TABLET", hint: "touchscreen" },
+{ word: "LAPTOP", hint: "portable" },
+{ word: "PRINTER", hint: "ink" },
+{ word: "MOUSE", hint: "click" },
+{ word: "SCREEN", hint: "display" },
+{ word: "CHARGER", hint: "plug" },
+{ word: "WI-FI", hint: "signal" },
+{ word: "PASSWORD", hint: "secure" }
 ];
 
 /* ================================
@@ -74,11 +257,19 @@ const leaveBtn = $("leaveBtn");
 const playersList = $("playersList");
 const hostPanel = $("hostPanel");
 
+const hintToggle = $("hintToggle");
+const hintOnlyIfImposterStartsToggle = $("hintOnlyIfImposterStartsToggle");
+const wordBankInput = $("wordBankInput");
+const useDefaultBankToggle = $("useDefaultBankToggle");
+const customBankWrap = $("customBankWrap");
+
+const imposterHintBox = $("imposterHintBox");
+const imposterHintText = $("imposterHintText");
+
 // legacy word controls (might not exist)
 const wordInput = $("wordInput");
 const randomWordBtn = $("randomWordBtn");
 
-const timerInput = $("timerInput");
 const startGameBtn = $("startGameBtn");
 const showResultsBtn = $("showResultsBtn");
 const resetPartyBtn = $("resetPartyBtn");
@@ -86,13 +277,56 @@ const resetPartyBtn = $("resetPartyBtn");
 const roleTag = $("roleTag");
 const wordDisplay = $("wordDisplay");
 const firstPlayerName = $("firstPlayerName");
-const timerDisplay = $("timerDisplay");
 const revealBox = $("revealBox");
 const imposterNameReveal = $("imposterNameReveal");
 const backToLobbyBtn = $("backToLobbyBtn");
 
 const toast = $("toast");
 const homeBtn = $("homeBtn");
+
+useDefaultBankToggle?.addEventListener("change", async () => {
+  applyBankUI();
+  if (!partyCode || !playerId) return;
+
+  const p = await getDoc(partyRef(partyCode));
+  if (!p.exists()) return;
+  if (p.data().hostUid !== playerId) return;
+
+  await updateDoc(partyRef(partyCode), {
+    useDefaultBank: !!useDefaultBankToggle.checked
+  });
+});
+
+
+hintToggle?.addEventListener("change", async () => {
+  applyHintToggleLock();
+  if (!partyCode || !playerId) return;
+
+  const p = await getDoc(partyRef(partyCode));
+  if (!p.exists()) return;
+  if (p.data().hostUid !== playerId) return;
+
+  await updateDoc(partyRef(partyCode), {
+    hintEnabled: !!hintToggle.checked,
+    // if turning off, force off the second setting in firestore too
+    hintOnlyIfImposterStarts: hintToggle.checked ? !!hintOnlyIfImposterStartsToggle?.checked : false
+  });
+});
+
+hintOnlyIfImposterStartsToggle?.addEventListener("change", async () => {
+  applyHintToggleLock();
+  if (!partyCode || !playerId) return;
+
+  const p = await getDoc(partyRef(partyCode));
+  if (!p.exists()) return;
+  if (p.data().hostUid !== playerId) return;
+
+  // only meaningful if hintToggle is on
+  await updateDoc(partyRef(partyCode), {
+    hintOnlyIfImposterStarts: !!hintOnlyIfImposterStartsToggle.checked
+  });
+});
+
 
 /* ================================
    STATE
@@ -106,6 +340,7 @@ let unsubParty = null;
 let unsubPlayers = null;
 
 let lastPartyData = null;
+let lobbyOverride = false; // host-only: stay in lobby even if game started
 
 /* ================================
    TOAST + VIEW
@@ -154,6 +389,64 @@ function escapeHtml(str) {
   return (str ?? "").replace(/[&<>"']/g, (m) => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   })[m]);
+}
+
+function parseWordBank(text) {
+  const lines = (text || "")
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  const out = [];
+  for (const line of lines) {
+    // Accept formats: WORD | hint   OR   WORD - hint
+    const parts = line.split("|").map(s => s.trim());
+    let word = parts[0] || "";
+    let hint = parts.slice(1).join(" | ").trim();
+
+    if (!hint && line.includes(" - ")) {
+      const p2 = line.split(" - ").map(s => s.trim());
+      word = p2[0] || word;
+      hint = p2.slice(1).join(" - ").trim();
+    }
+
+    word = word.toUpperCase().replace(/[^A-Z0-9 ]/g, "").trim();
+
+    if (word.length >= 2) {
+      out.push({ word, hint: hint || "No hint provided." });
+    }
+  }
+  return out;
+}
+
+function applyHintToggleLock() {
+  if (!hintToggle || !hintOnlyIfImposterStartsToggle) return;
+
+  const enabled = !!hintToggle.checked;
+
+  // Lock 2nd toggle off if first is off
+  hintOnlyIfImposterStartsToggle.disabled = !enabled;
+  if (!enabled) hintOnlyIfImposterStartsToggle.checked = false;
+}
+
+function setHintBoxVisible(show, text) {
+  if (!imposterHintBox || !imposterHintText) return;
+  if (!show) {
+    imposterHintBox.classList.add("hidden");
+    imposterHintText.textContent = "---";
+    return;
+  }
+  imposterHintText.textContent = text || "No hint provided.";
+  imposterHintBox.classList.remove("hidden");
+}
+
+function applyBankUI() {
+  const useDefault = !!useDefaultBankToggle?.checked;
+
+  // Hide/show textbox area
+  if (customBankWrap) {
+    customBankWrap.classList.toggle("hidden", useDefault);
+  }
 }
 
 /* ================================
@@ -242,11 +535,14 @@ function updateRoleTag(isImposter, revealed) {
 ================================ */
 let hideWordTimer = null;
 let currentRealWord = "---";
+let currentHintShouldShow = false;
+let currentHintText = "No hint provided.";
 
 function coverWord() {
   if (!wordDisplay) return;
   wordDisplay.classList.add("wordCovered");
   wordDisplay.classList.remove("wordRevealFlash");
+  setHintBoxVisible(false); // 👈 optional safety
 }
 
 function revealWordFor5s() {
@@ -261,11 +557,14 @@ function revealWordFor5s() {
 
   // actually reveal the real text
   wordDisplay.classList.remove("wordCovered");
+  // Show hint only during reveal window (prevents giveaway)
+  setHintBoxVisible(currentHintShouldShow, currentHintText);
   wordDisplay.classList.add("wordRevealFlash");
-
+  setHintBoxVisible(currentHintShouldShow, currentHintText);
   clearTimeout(hideWordTimer);
   hideWordTimer = setTimeout(() => {
     coverWord();
+    setHintBoxVisible(false);
     updateRoleTag(isImposterLocal, false);
   }, 5000); // change to 3000 if you prefer 3 seconds
 }
@@ -334,6 +633,15 @@ function subscribeToParty(code) {
     }
 
     const data = snap.data();
+
+    if (useDefaultBankToggle) useDefaultBankToggle.checked = data.useDefaultBank !== false; // default true
+applyBankUI();
+
+// Sync host toggle UI from party doc (safe for host and non-host; hostPanel hides anyway)
+if (hintToggle) hintToggle.checked = !!data.hintEnabled;
+if (hintOnlyIfImposterStartsToggle) hintOnlyIfImposterStartsToggle.checked = !!data.hintOnlyIfImposterStarts;
+applyHintToggleLock();
+
     lastPartyData = data;
     applyHostUI(data);
 
@@ -341,22 +649,26 @@ function subscribeToParty(code) {
     if (wordInput) wordInput.parentElement?.classList?.add?.("hidden");
     if (randomWordBtn) randomWordBtn.classList.add("hidden");
 
-    if (data.started) {
-      setView("game");
-      renderGame(data);
-    } else {
-      setView("lobby");
-      if (revealBox) revealBox.classList.add("hidden");
+    const isHostLocal = !!playerId && data.hostUid === playerId;
+const shouldStayLobby = isHostLocal && lobbyOverride && data.started;
 
-      // reset cover state
-      currentRealWord = "---";
-      if (wordDisplay) {
-        wordDisplay.textContent = currentRealWord;
-        wordDisplay.setAttribute("data-word", currentRealWord);
-      }
-      coverWord();
-      updateRoleTag(false, false);
-    }
+if (data.started && !shouldStayLobby) {
+  setView("game");
+  renderGame(data);
+} else {
+  setView("lobby");
+  if (revealBox) revealBox.classList.add("hidden");
+
+  // reset cover state
+  currentRealWord = "---";
+  if (wordDisplay) {
+    wordDisplay.textContent = currentRealWord;
+    wordDisplay.setAttribute("data-word", currentRealWord);
+  }
+  coverWord();
+  
+  updateRoleTag(false, false);
+}
   });
 
   unsubPlayers = onSnapshot(playersRef(code), async (snap) => {
@@ -382,14 +694,28 @@ function renderGame(party) {
   // Store the real word for THIS player
   currentRealWord = isImposterLocal ? "IMPOSTER" : (party.word || "---");
 
+    // ✅ Hint logic (compute now, but DON'T show until tap-to-reveal)
+  currentHintShouldShow = false;
+  currentHintText = party.wordHint || "No hint provided.";
+
+  if (party.hintEnabled && isImposterLocal) {
+    if (party.hintOnlyIfImposterStarts) {
+      // only show hint if the imposter is also the first player
+      currentHintShouldShow = party.firstPlayerId === party.imposterId;
+    } else {
+      currentHintShouldShow = true;
+    }
+  }
+
+  // IMPORTANT: hide hint by default when entering the game screen
+  setHintBoxVisible(false);
+
   // Set it, then cover
   if (wordDisplay) {
     wordDisplay.textContent = currentRealWord;
     wordDisplay.setAttribute("data-word", currentRealWord);
   }
   coverWord();
-
-  if (timerDisplay) timerDisplay.textContent = String(party.timerSec ?? 60);
 
   // First player name
   if (party.firstPlayerId && firstPlayerName) {
@@ -438,16 +764,19 @@ createPartyBtn?.addEventListener("click", async () => {
     }
 
     const party = {
-      code,
-      hostUid: playerId,
-      createdAt: Date.now(),
-      started: false,
-      revealed: false,
-      word: "",
-      imposterId: "",
-      firstPlayerId: "",
-      timerSec: 60
-    };
+  code,
+  hostUid: playerId,
+  createdAt: Date.now(),
+  started: false,
+  revealed: false,
+  word: "",
+  wordHint: "",
+  imposterId: "",
+  firstPlayerId: "",
+  useDefaultBank: true,
+  hintEnabled: false,
+  hintOnlyIfImposterStarts: false
+};
 
     await setDoc(partyRef(code), party);
 
@@ -537,22 +866,36 @@ startGameBtn?.addEventListener("click", async () => {
 
     if (players.length < 3) return showToast("Need at least 3 players.");
 
-    const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+    // Build the bank from textarea (host-only convenience). If empty/invalid, fall back.
+// Decide which bank to use (default toggle ON uses built-in list)
+const useDefault = !!useDefaultBankToggle?.checked;
+
+let bank = WORD_BANK;
+
+if (!useDefault) {
+  const customBank = parseWordBank(wordBankInput?.value || "");
+  if (customBank.length) bank = customBank;
+}
+
+const pick = bank[Math.floor(Math.random() * bank.length)];
+const word = pick.word;
+const wordHint = pick.hint || "";
     const imposter = players[Math.floor(Math.random() * players.length)];
 
     let first = players[Math.floor(Math.random() * players.length)];
     if (!first) first = players[0];
-
-    const timerSec = Math.max(10, Math.min(300, Number(timerInput?.value || 60)));
-
+    lobbyOverride = false;
     await updateDoc(partyRef(partyCode), {
-      started: true,
-      revealed: false,
-      word,
-      imposterId: imposter.id,
-      firstPlayerId: first.id,
-      timerSec
-    });
+  started: true,
+  revealed: false,
+  word,
+  wordHint,
+  imposterId: imposter.id,
+  firstPlayerId: first.id,
+  hintEnabled: !!hintToggle?.checked,
+  hintOnlyIfImposterStarts: !!hintOnlyIfImposterStartsToggle?.checked,
+  useDefaultBank: !!useDefaultBankToggle?.checked
+});
 
     showToast("Game started!");
   } catch (e) {
@@ -589,6 +932,7 @@ resetPartyBtn?.addEventListener("click", async () => {
 
     if (p.data().hostUid !== playerId) return showToast("Only the host can reset.");
 
+    lobbyOverride = false;
     await updateDoc(partyRef(partyCode), {
       started: false,
       revealed: false,
@@ -606,7 +950,11 @@ resetPartyBtn?.addEventListener("click", async () => {
 });
 
 // Back to lobby (UI only)
-backToLobbyBtn?.addEventListener("click", () => setView("lobby"));
+backToLobbyBtn?.addEventListener("click", () => {
+  // Host can temporarily stay in lobby to change switches
+  lobbyOverride = true;
+  setView("lobby");
+});
 
 // Home button
 homeBtn?.addEventListener("click", () => {
@@ -617,4 +965,5 @@ homeBtn?.addEventListener("click", () => {
 /* ================================
    INITIAL
 ================================ */
+applyBankUI();
 setView("home");

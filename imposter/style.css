@@ -1278,3 +1278,147 @@ body::before {
 .panel .btn {
   margin-top: 8px;
 }
+
+/* ============================= */
+/* TOGGLES + WORD BANK */
+/* ============================= */
+
+.switchStack {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding: 12px 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.switchTitle {
+  font-weight: 800;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.switchDesc {
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+/* iOS-friendly toggle */
+.switch {
+  position: relative;
+  width: 54px;
+  height: 32px;
+  flex: 0 0 auto;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: 0.2s ease;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 24px;
+  width: 24px;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.85);
+  transition: 0.2s ease;
+}
+
+.switch input:checked + .slider {
+  background: rgba(99,102,241,0.35);
+  border-color: rgba(99,102,241,0.55);
+  box-shadow: 0 0 0 4px rgba(99,102,241,0.14);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateY(-50%) translateX(22px);
+  background: #ffffff;
+}
+
+/* Disabled-looking toggle (we'll also disable it in JS) */
+.switch input:disabled + .slider {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Word bank textarea */
+.textarea {
+  resize: vertical;
+  min-height: 130px;
+  line-height: 1.35;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 13px;
+}
+
+/* ============================= */
+/* IMPOSTER HINT BOX (GAME) */
+/* ============================= */
+
+.imposterHint {
+  margin: -10px auto 18px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  width: min(560px, 96%);
+  background: linear-gradient(135deg, rgba(99,102,241,0.20), rgba(79,70,229,0.12));
+  border: 1px solid rgba(99,102,241,0.28);
+  text-align: left;
+}
+
+.imposterHintTitle {
+  font-weight: 900;
+  letter-spacing: 2px;
+  font-size: 11px;
+  color: #c7d2fe;
+}
+
+.imposterHintText {
+  margin-top: 8px;
+  font-size: 15px;
+  color: #e2e8f0;
+  line-height: 1.35;
+}
+
+/* Mobile tightening */
+@media (max-width: 520px) {
+  .switchRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .switch {
+    align-self: flex-end;
+  }
+}
+
+#customBankWrap.hidden {
+  display: none !important;
+}
