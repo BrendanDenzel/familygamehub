@@ -14,7 +14,8 @@ import {
   onSnapshot,
   collection,
   setDoc as setSubDoc,
-  deleteDoc
+  deleteDoc,
+  deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 import {
@@ -270,6 +271,7 @@ const imposterHintText = $("imposterHintText");
 const wordInput = $("wordInput");
 const randomWordBtn = $("randomWordBtn");
 
+const startNewRoundBtn = $("startNewRoundBtn");
 const startGameBtn = $("startGameBtn");
 const showResultsBtn = $("showResultsBtn");
 const resetPartyBtn = $("resetPartyBtn");
@@ -359,6 +361,7 @@ function setView(name) {
     name === "home" ? "Lobby" : name === "lobby" ? "Lobby" : "Game";
 }
 
+
 /* ================================
    HELPERS
 ================================ */
@@ -371,6 +374,37 @@ function makeCode(len = 5) {
   let out = "";
   for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
   return out;
+}
+
+playersList?.addEventListener("click", (e) => {
+  const btn = e.target.closest?.("[data-kick]");
+  if (!btn) return;
+  const targetId = btn.getAttribute("data-kick");
+  kickPlayer(targetId).catch((err) => {
+    console.error("Kick failed:", err);
+    showToast(err?.message || "Kick failed");
+  });
+});
+
+async function kickPlayer(targetId) {
+  if (!partyCode || !playerId) return;
+
+  const p = await getDoc(partyRef(partyCode));
+  if (!p.exists()) return;
+
+  const data = p.data() || {};
+  if (data.hostUid !== playerId) return showToast("Only the host can kick.");
+  if (!targetId || targetId === playerId) return;
+
+  // 1) Delete the player doc (boots them from the party)
+  await deleteDoc(playerDocRef(partyCode, targetId));
+
+  // 2) Mark them as kicked so their client can show a message and go home
+  await updateDoc(partyRef(partyCode), {
+    [`kicked.${targetId}`]: Date.now()
+  });
+
+  showToast("Player kicked.");
 }
 
 function partyRef(code) {
@@ -419,6 +453,88 @@ function parseWordBank(text) {
   return out;
 }
 
+
+function mulberry32(seed) {
+  let t = seed >>> 0;
+  return function () {
+    t += 0x6D2B79F5;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function pickWordWithRecency(bank, recentWords = [], seedNumber = Date.now()) {
+  const rng = mulberry32(seedNumber);
+
+  // normalize to uppercase words
+  const recent = new Set((recentWords || []).map(w => String(w).toUpperCase()));
+
+  // weights:
+  // - normal words: 1.0
+  // - recently used: 0.08 (still possible, just rare)
+  // - tiny chaos so nothing becomes “mathematically obvious”
+  const weights = bank.map(item => {
+    const w = String(item.word || "").toUpperCase();
+    const base = recent.has(w) ? 0.08 : 1.0;
+    const chaos = 0.9 + rng() * 0.2; // 0.9..1.1
+    return base * chaos;
+  });
+
+  let total = 0;
+  for (const w of weights) total += w;
+
+  let roll = rng() * total;
+  for (let i = 0; i < bank.length; i++) {
+    roll -= weights[i];
+    if (roll <= 0) return bank[i];
+  }
+  return bank[bank.length - 1];
+}
+
+// ================================
+// WEIGHTED PICK (luck-debt + tiny chaos)
+// ================================
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function computeWeight({ roundNum, lastRound = 0, count = 0, wasLastRound = false }) {
+  // rounds since last picked (if never picked, lastRound=0 => big since)
+  const since = clamp(roundNum - (lastRound || 0), 1, 8);
+
+  // 1) cooldown boost (more time since last pick => more weight)
+  const cooldownBoost = 1 + 0.35 * since; // 1.35..3.8
+
+  // 2) soft repeat penalty (still possible, just less likely)
+  const repeatPenalty = wasLastRound ? 0.35 : 1;
+
+  // 3) long-run balance (people who have been picked more get slightly less weight)
+  const balancePenalty = 1 / (1 + 0.25 * (count || 0)); // 1, 0.80, 0.67, ...
+
+  // 4) tiny chaos so it never feels deterministic
+  const chaos = 0.9 + Math.random() * 0.2; // 0.9..1.1
+
+  const w = cooldownBoost * repeatPenalty * balancePenalty * chaos;
+
+  // Never let anyone hit 0 probability
+  return Math.max(0.05, w);
+}
+
+function weightedPick(items, getWeight) {
+  if (!Array.isArray(items) || items.length === 0) return null;
+
+  const weights = items.map((it) => Math.max(0.0001, Number(getWeight(it)) || 0.0001));
+  const total = weights.reduce((a, b) => a + b, 0);
+
+  let r = Math.random() * total;
+  for (let i = 0; i < items.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return items[i];
+  }
+  return items[items.length - 1];
+}
+
 function applyHintToggleLock() {
   if (!hintToggle || !hintOnlyIfImposterStartsToggle) return;
 
@@ -449,6 +565,13 @@ function applyBankUI() {
   }
 }
 
+function setRevealButtonVisible(visible) {
+  if (!showResultsBtn) return;
+  // Inline style is the most reliable (beats CSS conflicts)
+  showResultsBtn.style.display = visible ? "" : "none";
+}
+
+
 /* ================================
    AUTH (Anonymous)
 ================================ */
@@ -466,24 +589,28 @@ async function ensureAuth() {
    HOST UI (single source of truth)
 ================================ */
 function applyHostUI(data) {
-  // If we don't have auth uid yet, don't decide host
   if (!data || !playerId) {
     isHost = false;
     if (hostPanel) hostPanel.style.display = "none";
+    setRevealButtonVisible(false);
     if (showResultsBtn) showResultsBtn.disabled = true;
     return;
   }
 
   isHost = data.hostUid === playerId;
+  // Host-only buttons on the game screen
+if (startNewRoundBtn) startNewRoundBtn.classList.toggle("hidden", !isHost);
+if (showResultsBtn) showResultsBtn.classList.toggle("hidden", !isHost);
+
   if (hostPanel) hostPanel.style.display = isHost ? "block" : "none";
+
+  // ✅ Only host sees it
+  setRevealButtonVisible(isHost);
 
   // enabled only when host + started + not revealed yet
   if (showResultsBtn) {
     showResultsBtn.disabled = !(isHost && data.started && !data.revealed);
   }
-
-  // Optional debug (safe):
-  console.log("HOST CHECK:", { playerId, hostUid: data.hostUid, isHost, started: data.started, revealed: data.revealed });
 }
 
 async function refreshPartyUI() {
@@ -582,20 +709,33 @@ if (wordDisplay) {
 function renderPlayers(players, hostUid) {
   if (!playersList) return;
 
+  const hostIsMe = !!playerId && hostUid === playerId;
+
   playersList.innerHTML = "";
   for (const p of players) {
     const row = document.createElement("div");
     row.className = "player";
+
+    const isHostRow = p.id === hostUid;
+    const isMeRow = p.id === playerId;
+
     row.innerHTML = `
       <div>
         <div style="font-weight:800;">${escapeHtml(p.name)}</div>
         <div style="color:#94a3b8;font-size:12px;">${escapeHtml((p.id || "").slice(0, 6))}</div>
       </div>
-      <div>
-        ${p.id === hostUid ? `<span class="badge">HOST</span>` : ``}
-        ${p.id === playerId ? `<span class="badge" style="margin-left:8px;background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12)">YOU</span>` : ``}
+      <div class="row gap">
+        ${isHostRow ? `<span class="badge">HOST</span>` : ``}
+        ${isMeRow ? `<span class="badge" style="margin-left:8px;background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.12)">YOU</span>` : ``}
+        ${
+          // Host sees kick buttons next to everyone except themselves
+          hostIsMe && !isHostRow
+            ? `<button class="kickBtn" data-kick="${escapeHtml(p.id)}">KICK</button>`
+            : ``
+        }
       </div>
     `;
+
     playersList.appendChild(row);
   }
 }
@@ -633,6 +773,13 @@ function subscribeToParty(code) {
     }
 
     const data = snap.data();
+
+    // If this client was kicked, notify and return them to home
+if (playerId && data?.kicked && data.kicked[playerId]) {
+  showToast("You have been kicked from the party.");
+  goHomeHard();
+  return;
+}
 
     if (useDefaultBankToggle) useDefaultBankToggle.checked = data.useDefaultBank !== false; // default true
 applyBankUI();
@@ -686,6 +833,7 @@ if (data.started && !shouldStayLobby) {
    GAME RENDER
 ================================ */
 function renderGame(party) {
+  setRevealButtonVisible(isHost);
   const isImposterLocal = party.imposterId === playerId;
 
   // Hide role initially
@@ -763,7 +911,7 @@ createPartyBtn?.addEventListener("click", async () => {
       code = makeCode(5);
     }
 
-    const party = {
+   const party = {
   code,
   hostUid: playerId,
   createdAt: Date.now(),
@@ -775,7 +923,12 @@ createPartyBtn?.addEventListener("click", async () => {
   firstPlayerId: "",
   useDefaultBank: true,
   hintEnabled: false,
-  hintOnlyIfImposterStarts: false
+  hintOnlyIfImposterStarts: false,
+
+  // NEW: fairness memory (persists across rounds)
+  roundNumber: 0,
+  imposterStats: {},     // { [playerId]: { lastRound: number, count: number } }
+  firstPlayerStats: {}   // { [playerId]: { lastRound: number, count: number } }
 };
 
     await setDoc(partyRef(code), party);
@@ -808,7 +961,17 @@ joinPartyBtn?.addEventListener("click", async () => {
 
     const p = await getDoc(partyRef(code));
     if (!p.exists()) return showToast("That party code doesn't exist.");
-    if (p.data().started) return showToast("Game already started. Ask host to reset.");
+
+    const partyData = p.data() || {};
+
+    // ✅ IMPORTANT: clear my own kick flag BEFORE joining
+    if (partyData.kicked && partyData.kicked[playerId]) {
+      await updateDoc(partyRef(code), {
+        [`kicked.${playerId}`]: deleteField()
+      });
+    }
+
+    if (partyData.started) return showToast("Game already started. Ask host to reset.");
 
     await setSubDoc(playerDocRef(code, playerId), {
       id: playerId,
@@ -870,6 +1033,106 @@ startGameBtn?.addEventListener("click", async () => {
 // Decide which bank to use (default toggle ON uses built-in list)
 const useDefault = !!useDefaultBankToggle?.checked;
 
+// Host: start a new round WITHOUT going back to lobby (keeps fairness + recency)
+startNewRoundBtn?.addEventListener("click", async () => {
+  try {
+    if (!partyCode) return;
+
+    const p = await getDoc(partyRef(partyCode));
+    if (!p.exists()) return;
+
+    const partyData = p.data() || {};
+    if (partyData.hostUid !== playerId) return showToast("Only the host can start a new round.");
+
+    // Pull players
+    const { getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+    const snap = await getDocs(playersRef(partyCode));
+    const players = snap.docs.map(d => d.data()).filter(Boolean);
+
+    if (players.length < 3) return showToast("Need at least 3 players.");
+
+    // Bank: use saved setting from party doc (fallback to current toggle)
+    const useDefault = (partyData.useDefaultBank !== false); // default true
+    let bank = WORD_BANK;
+
+    if (!useDefault) {
+      const customBank = parseWordBank(wordBankInput?.value || "");
+      if (customBank.length) bank = customBank;
+    }
+
+    // Word with recency
+    const recentWords = partyData.recentWords || [];
+    const seed = (partyData.createdAt || Date.now()) + Date.now();
+    const pick = pickWordWithRecency(bank, recentWords, seed);
+    const word = pick.word;
+    const wordHint = pick.hint || "";
+
+    const nextRecentWords = [word, ...recentWords.filter(w => w !== word)].slice(0, 25);
+
+    // Fairness stats (persisted)
+    const nextRound = (partyData.roundNumber || 0) + 1;
+    const imposterStats = partyData.imposterStats || {};
+    const firstPlayerStats = partyData.firstPlayerStats || {};
+
+    const imposter = weightedPick(players, (pl) => {
+      const st = imposterStats[pl.id] || {};
+      const wasLastRound = (st.lastRound || 0) === (nextRound - 1);
+      return computeWeight({
+        roundNum: nextRound,
+        lastRound: st.lastRound || 0,
+        count: st.count || 0,
+        wasLastRound
+      });
+    });
+
+    const first = weightedPick(players, (pl) => {
+      const st = firstPlayerStats[pl.id] || {};
+      const wasLastRound = (st.lastRound || 0) === (nextRound - 1);
+      return computeWeight({
+        roundNum: nextRound,
+        lastRound: st.lastRound || 0,
+        count: st.count || 0,
+        wasLastRound
+      });
+    });
+
+    // Update stats
+    const impSt = imposterStats[imposter.id] || { lastRound: 0, count: 0 };
+    imposterStats[imposter.id] = { lastRound: nextRound, count: (impSt.count || 0) + 1 };
+
+    const fpSt = firstPlayerStats[first.id] || { lastRound: 0, count: 0 };
+    firstPlayerStats[first.id] = { lastRound: nextRound, count: (fpSt.count || 0) + 1 };
+
+    // Keep game "started" so everyone stays in game view
+    lobbyOverride = false;
+
+    await updateDoc(partyRef(partyCode), {
+      started: true,
+      revealed: false,
+      word,
+      wordHint,
+      imposterId: imposter.id,
+      firstPlayerId: first.id,
+
+      // Keep the current settings from the party doc
+      hintEnabled: !!partyData.hintEnabled,
+      hintOnlyIfImposterStarts: !!partyData.hintOnlyIfImposterStarts,
+      useDefaultBank: !!useDefault,
+
+      // Persisted memory
+      roundNumber: nextRound,
+      imposterStats,
+      firstPlayerStats,
+      recentWords: nextRecentWords
+    });
+
+    showToast("New round started!");
+  } catch (e) {
+    console.error("Start new round failed:", e);
+    showToast(e?.message || "Start new round failed");
+  }
+});
+
 let bank = WORD_BANK;
 
 if (!useDefault) {
@@ -877,24 +1140,78 @@ if (!useDefault) {
   if (customBank.length) bank = customBank;
 }
 
-const pick = bank[Math.floor(Math.random() * bank.length)];
+const partyData = p.data() || {};
+const recentWords = partyData.recentWords || [];
+
+const seed = (partyData.createdAt || Date.now()) + Date.now();
+
+const pick = pickWordWithRecency(bank, recentWords, seed);
 const word = pick.word;
 const wordHint = pick.hint || "";
-    const imposter = players[Math.floor(Math.random() * players.length)];
 
-    let first = players[Math.floor(Math.random() * players.length)];
-    if (!first) first = players[0];
-    lobbyOverride = false;
-    await updateDoc(partyRef(partyCode), {
+// keep last 25 used words
+const nextRecentWords = [word, ...recentWords.filter(w => w !== word)].slice(0, 25);
+    // ===== NEW: weighted imposter + weighted first player (both with tiny chaos) =====
+const nextRound = (partyData.roundNumber || 0) + 1;
+
+// pull existing stats (or default)
+const imposterStats = partyData.imposterStats || {};
+const firstPlayerStats = partyData.firstPlayerStats || {};
+
+// build a stable list of player ids
+const ids = players.map(pl => pl.id).filter(Boolean);
+
+// pick imposter (weighted)
+const imposter = weightedPick(players, (pl) => {
+  const st = imposterStats[pl.id] || {};
+  const wasLastRound = (st.lastRound || 0) === (nextRound - 1);
+  return computeWeight({
+    roundNum: nextRound,
+    lastRound: st.lastRound || 0,
+    count: st.count || 0,
+    wasLastRound
+  });
+});
+
+// pick first player (weighted) — independent from imposter (can be same person)
+const first = weightedPick(players, (pl) => {
+  const st = firstPlayerStats[pl.id] || {};
+  const wasLastRound = (st.lastRound || 0) === (nextRound - 1);
+  return computeWeight({
+    roundNum: nextRound,
+    lastRound: st.lastRound || 0,
+    count: st.count || 0,
+    wasLastRound
+  });
+});
+
+// update stats
+const impSt = imposterStats[imposter.id] || { lastRound: 0, count: 0 };
+imposterStats[imposter.id] = { lastRound: nextRound, count: (impSt.count || 0) + 1 };
+
+const fpSt = firstPlayerStats[first.id] || { lastRound: 0, count: 0 };
+firstPlayerStats[first.id] = { lastRound: nextRound, count: (fpSt.count || 0) + 1 };
+
+// start game
+lobbyOverride = false;
+
+await updateDoc(partyRef(partyCode), {
   started: true,
   revealed: false,
   word,
   wordHint,
   imposterId: imposter.id,
   firstPlayerId: first.id,
+
   hintEnabled: !!hintToggle?.checked,
   hintOnlyIfImposterStarts: !!hintOnlyIfImposterStartsToggle?.checked,
-  useDefaultBank: !!useDefaultBankToggle?.checked
+  useDefaultBank: !!useDefaultBankToggle?.checked,
+
+  // NEW persisted memory
+  roundNumber: nextRound,
+  imposterStats,
+  firstPlayerStats,
+  recentWords: nextRecentWords,
 });
 
     showToast("Game started!");

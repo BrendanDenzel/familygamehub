@@ -268,13 +268,6 @@ body::before {
 /* WORD PAGE */
 /* ============================= */
 
-.word-page {
-  height: calc(100vh - 60px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .word-box {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
@@ -1421,4 +1414,66 @@ body::before {
 
 #customBankWrap.hidden {
   display: none !important;
+}
+
+/* Hide reveal button cleanly */
+.revealBtn.hidden {
+  display: none !important;
+}
+
+/* When only 1 button remains, center it nicely */
+.gameButtons:has(.revealBtn.hidden) {
+  justify-content: center;
+}
+
+/* ============================= */
+/* GAME VIEW: center the word box vertically on mobile */
+/* ============================= */
+
+/* Mobile: center vertically, but allow scrolling if content is taller than the screen */
+@media (max-width: 768px) {
+  .word-page {
+    height: calc(100dvh - var(--navH));
+    display: flex;
+    align-items: center;     /* ✅ vertical center */
+    justify-content: center; /* ✅ horizontal center */
+    padding: 16px;
+    overflow-y: auto;        /* ✅ still scroll if needed */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .word-box {
+    margin: auto 0;          /* ✅ helps true vertical centering */
+  }
+}
+
+/* Space above the bottom game buttons */
+.gameButtons {
+  margin-top: 12px;
+}
+
+/* Hide start new round button cleanly */
+.newRoundBtn.hidden {
+  display: none !important;
+}
+
+.kickBtn {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.35);
+  color: #fecaca;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.kickBtn:hover {
+  background: rgba(239,68,68,0.22);
+  transform: translateY(-1px);
+}
+
+.kickBtn:active {
+  transform: translateY(0px);
 }

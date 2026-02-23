@@ -70,7 +70,7 @@
           <div class="switchRow">
   <div>
     <div class="switchTitle">Use Default Word Bank</div>
-    <div class="switchDesc">ON uses built-in words & hints. OFF lets you paste your own list.</div>
+    <div class="switchDesc">If ON, built-in words & hints are used. If OFF, you can paste your own list.</div>
   </div>
 
   <label class="switch">
@@ -83,7 +83,7 @@
   <div class="switchRow">
     <div>
       <div class="switchTitle">Hint for Imposter</div>
-      <div class="switchDesc">If ON, the imposter sees a hint in-game.</div>
+      <div class="switchDesc">If ON, the imposter sees a NON OBVIOUS hint in-game.</div>
     </div>
 
     <label class="switch">
@@ -95,7 +95,7 @@
   <div class="switchRow">
     <div>
       <div class="switchTitle">Hint only if Imposter starts</div>
-      <div class="switchDesc">Locked unless “Hint for Imposter” is ON.</div>
+      <div class="switchDesc">If ON, the hint is only given if the Imposter starts the round for fairness.</div>
     </div>
 
     <label class="switch">
@@ -128,7 +128,7 @@ SUBMARINE | Underwater vehicle"
           <div class="controlbuttons">
             <div class="row gap wrap">
               <button class="btn primary" id="startGameBtn">Start Game</button>
-              <button class="btn danger" id="resetPartyBtn">Reset Round</button>
+              <button class="btn danger" id="resetPartyBtn">Reset</button>
             </div>
           </div>
 
@@ -166,10 +166,11 @@ SUBMARINE | Underwater vehicle"
             Don’t say the word out loud. Discuss, draw, or play however you want — host reveals the imposter when ready.
           </p>
 
-          <div class="row center gap">
-            <button class="btn" id="showResultsBtn" disabled>Reveal Imposter</button>
-            <button class="btn" id="backToLobbyBtn">Back to Lobby</button>
-          </div>
+          <div class="row center gap gameButtons">
+  <button class="btn primary newRoundBtn" id="startNewRoundBtn">Start New Round</button>
+  <button class="btn revealBtn" id="showResultsBtn" disabled>Reveal Imposter</button>
+  <button class="btn" id="backToLobbyBtn">Back to Lobby</button>
+</div>
         </div>
       </section>
     </main>
