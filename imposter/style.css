@@ -1643,6 +1643,24 @@ body::before {
 }
 }
 
+/* ============================= */
+/* MOBILE: make Home button shorter */
+/* ============================= */
+
+@media (max-width: 600px) {
+
+  .nav-home-btn {
+    height: 30px !important;      /* shrink the box height */
+    padding: 2px 8px !important;  /* smaller top/bottom padding */
+    font-size: 13px !important;
+    border-radius: 8px !important;
+  }
+
+  .nav-home-btn span {
+    font-size: 13px !important;
+  }
+
+}
 
 
 
