@@ -447,48 +447,6 @@ button:active {
 
 
 /* ============================= */
-/* SHORTEN NAV TEXT ON PHONE PORTRAIT */
-/* ============================= */
-
-@media (max-width: 900px) and (orientation: portrait) {
-
-/* Force nav links to stay horizontal */
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 18px;          /* spacing between links */
-  flex-wrap: nowrap;  /* never stack */
-  white-space: nowrap;
-}
-
-/* If you keep gap, remove the margin-left spacing */
-.nav-right a {
-  margin-left: 0;
-}
-
-  .nav-right a[href*="word-generator"] {
-    font-size: 16px;
-  }
-
-  .nav-right a[href*="word-generator"]::after {
-    content: "Word Generator";
-  }
-
-  .nav-right a[href*="word-generator"] {
-    color: transparent;
-    position: relative;
-    white-space: nowrap;
-  }
-
-  .nav-right a[href*="word-generator"]::after {
-    position: absolute;
-    left: 0;
-    color: #e2e8f0;
-  }
-
-}
-
-/* ============================= */
 /* WORD GENERATOR: MOBILE FIX */
 /* Paste at the BOTTOM */
 /* ============================= */
@@ -752,3 +710,578 @@ button {
   z-index: 2000;
   pointer-events: none;
 }
+
+.nav-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-home-btn:hover {
+  background: rgba(99,102,241,0.2);
+  border-color: rgba(99,102,241,0.5);
+}
+
+.nav-home-btn span {
+  font-size: 14px;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 8px;
+}
+
+.nav-status {
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-home-btn:hover {
+  background: rgba(99,102,241,0.2);
+  border-color: rgba(99,102,241,0.5);
+}
+
+.nav-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Mobile only — shrink Main Menu button */
+@media (max-width: 600px) {
+  .nav-home-btn {
+    padding: 0px 5px;
+    font-size: 1wpx;
+    height: 34px;      /* smaller than desktop */
+    border-radius: 10px;
+  }
+
+  /* --- Top nav: keep on one line + tighter spacing on mobile --- */
+.top-nav {
+  display: flex;
+  align-items: center;      /* vertical centering */
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;      /* vertical centering */
+  gap: 10px;                /* default gap desktop */
+  flex-wrap: nowrap;        /* DON'T wrap to new line */
+  white-space: nowrap;      /* keep text on one line */
+}
+
+/* Divider tighter + smaller */
+.nav-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(226,232,240,0.25);
+  margin: 0 6px;            /* space around the | */
+  flex: 0 0 auto;
+}
+
+/* Make the nav link text behave nicely */
+#navStatus,
+#nav-newparty-btn {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  padding: 6px 8px;         /* clickable but not huge */
+  text-decoration: none;
+}
+
+/* Home button tighter so it doesn't hog space */
+.nav-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;                 /* space between emoji + text */
+  padding: 6px 10px;
+  font-size: 14px;
+  line-height: 1;
+}
+}
+
+/* --- Mobile tightening --- */
+@media (max-width: 520px) {
+  .nav-right {
+    gap: 5px;               /* less space between items */
+  }
+
+  .nav-divider {
+    margin: 0 4px;
+    height: 16px;
+  }
+
+  .nav-home-btn {
+    padding: -20px 10px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  #navStatus,
+  #nav-newparty-btn {
+    font-size: 14px;
+  }
+}
+
+/* Hide emoji ONLY on mobile */
+@media (max-width: 520px) {
+  .homeIcon {
+    display: none;
+  }
+
+  .nav-home-btn {
+    gap: 0; /* remove extra spacing when icon gone */
+  }
+}
+
+.nav-home-btn {
+  transform: translateY(-.25px);
+}
+
+@media (max-width: 520px) {
+.nav-home-btn {
+  transform: translateY(0px);
+}
+}
+
+.nav-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-home-btn:hover {
+  background: rgba(99,102,241,0.2);
+  border-color: rgba(99,102,241,0.5);
+}
+
+.nav-home-btn span {
+  font-size: 14px;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 8px;
+}
+
+.nav-status {
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-home-btn:hover {
+  background: rgba(99,102,241,0.2);
+  border-color: rgba(99,102,241,0.5);
+}
+
+.nav-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Mobile only — shrink Main Menu button */
+@media (max-width: 600px) {
+  .nav-home-btn {
+    padding: 0px 5px;
+    font-size: 1wpx;
+    height: 34px;      /* smaller than desktop */
+    border-radius: 10px;
+  }
+
+  /* --- Top nav: keep on one line + tighter spacing on mobile --- */
+.top-nav {
+  display: flex;
+  align-items: center;      /* vertical centering */
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;      /* vertical centering */
+  gap: 10px;                /* default gap desktop */
+  flex-wrap: nowrap;        /* DON'T wrap to new line */
+  white-space: nowrap;      /* keep text on one line */
+}
+
+/* Divider tighter + smaller */
+.nav-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(226,232,240,0.25);
+  margin: 0 6px;            /* space around the | */
+  flex: 0 0 auto;
+}
+
+/* Make the nav link text behave nicely */
+#navStatus,
+#nav-newparty-btn {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  padding: 6px 8px;         /* clickable but not huge */
+  text-decoration: none;
+}
+
+/* Home button tighter so it doesn't hog space */
+.nav-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;                 /* space between emoji + text */
+  padding: 6px 10px;
+  font-size: 14px;
+  line-height: 1;
+}
+}
+
+/* --- Mobile tightening --- */
+@media (max-width: 520px) {
+  .nav-right {
+    gap: 5px;               /* less space between items */
+  }
+
+  .nav-divider {
+    margin: 0 4px;
+    height: 16px;
+  }
+
+  .nav-home-btn {
+    padding: -20px 10px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  #navStatus,
+  #nav-newparty-btn {
+    font-size: 14px;
+  }
+}
+
+/* Hide emoji ONLY on mobile */
+@media (max-width: 520px) {
+  .homeIcon {
+    display: none;
+  }
+
+  .nav-home-btn {
+    gap: 0; /* remove extra spacing when icon gone */
+  }
+}
+
+.nav-home-btn {
+  transform: translateY(-.25px);
+}
+
+@media (max-width: 520px) {
+.nav-home-btn {
+  transform: translateY(0px);
+}
+}
+
+
+/* ============================= */
+/* NAVBAR (MATCH IMPOSTER STYLE) */
+/* Paste at the BOTTOM so it wins */
+/* ============================= */
+
+.top-nav {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.nav-left {
+  text-decoration: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: 0.2s ease;
+}
+.nav-left:hover { opacity: 0.85; }
+
+/* Right side row (never wrap) */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+/* Imposter-style home button */
+.nav-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  transform: translateY(-0.25px); /* tiny nudge like imposter */
+}
+.nav-home-btn:hover {
+  background: rgba(99,102,241,0.2);
+  border-color: rgba(99,102,241,0.5);
+}
+.nav-home-btn span { font-size: 14px; }
+
+/* Divider line */
+.nav-divider {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  background: rgba(226,232,240,0.25);
+  flex: 0 0 auto;
+}
+
+/* Nav links */
+.nav-right a {
+  display: inline-flex;
+  align-items: center;
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: 10px;
+  line-height: 1;
+  transition: 0.2s ease;
+  margin-left: 0; /* IMPORTANT: kill your old margin-left rule */
+}
+
+.nav-right a:hover,
+.nav-right a.active {
+  color: #fff;
+}
+
+
+/* ============================= */
+/* MOBILE: make everything smaller + tighter */
+/* Paste at the VERY BOTTOM so it wins */
+/* ============================= */
+
+@media (max-width: 600px) {
+
+  /* overall text scale */
+  body { font-size: 14px; }
+
+  /* NAV tighter */
+  .top-nav {
+    height: 52px;
+    padding: 0 12px !important;
+    gap: 8px;
+  }
+
+  .nav-left {
+    font-size: 16px !important;
+    letter-spacing: 0.4px !important;
+  }
+
+  .nav-right {
+    gap: 6px !important;
+  }
+
+  .nav-right a {
+    font-size: 13px !important;
+    padding: 5px 6px !important;
+  }
+
+  .nav-home-btn {
+    height: 32px !important;
+    padding: 4px 8px !important;
+    gap: 4px !important;
+    transform: translateY(0px) !important;
+  }
+
+  .nav-home-btn span {
+    font-size: 13px !important;
+  }
+
+  .nav-divider {
+    height: 14px !important;
+    margin: 0 4px !important;
+  }
+
+  /* Controls panel tighter */
+  .controls-panel {
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+
+  .tool-section {
+    gap: 6px !important;
+  }
+
+  .tool-toggle {
+    gap: 6px !important;
+  }
+
+  /* Buttons smaller (keeps them usable) */
+  button {
+    font-size: 13px !important;
+    padding: 9px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .reset-board-btn {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    transform: none !important;
+  }
+
+  /* Word page smaller */
+  .word-box {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 18px 14px !important;
+    border-radius: 16px !important;
+  }
+
+  #wordDisplay {
+    font-size: 44px !important;
+    margin-bottom: 16px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .difficulty-buttons {
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+    flex-wrap: wrap;
+  }
+
+  #timerDisplay {
+    font-size: 28px !important;
+    padding: 10px 16px !important;
+    border-radius: 10px !important;
+  }
+
+  #timeUpNotification {
+    font-size: 13px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+  }
+}
+
+/* Even smaller phones */
+@media (max-width: 380px) {
+  .nav-left { font-size: 15px !important; }
+  .nav-right a { font-size: 12px !important; padding: 5px 5px !important; }
+  .nav-home-btn span { font-size: 12px !important; }
+  #wordDisplay { font-size: 38px !important; }
+  button { font-size: 12.5px !important; padding: 8px 9px !important; }
+}
+
+
+/* default: show full */
+#navWords .shortText { display: none; }
+#navWords .fullText  { display: inline; }
+
+/* mobile: show short */
+@media (max-width: 600px) {
+  #navWords .fullText  { display: none !important; }
+  #navWords .shortText { display: inline !important; }
+}
+
+
+/* ============================= */
+/* MOBILE NAV SPACING FIX */
+/* ============================= */
+
+@media (max-width: 600px) {
+
+  /* reduce outer padding */
+  .top-nav {
+    padding-left: 12px !important;
+    padding-right: 10px !important;
+  }
+
+  /* tighten gap between logo and menu */
+  .nav-right {
+    gap: 6px !important;
+  }
+
+  /* remove extra spacing on links */
+  .nav-right a {
+    padding: 4px 5px !important;
+  }
+
+  /* divider tighter */
+  .nav-divider {
+    margin: 0 4px !important;
+  }
+}
+
+

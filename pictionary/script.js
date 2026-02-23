@@ -225,3 +225,13 @@ function updateTimerDisplay() {
   timerDisplay.textContent = timeLeft; // just show seconds
 }
 
+// Put this near the bottom of your script (after the button exists)
+const mainMenuBtn = document.querySelector('.nav-home-btn');
+
+if (mainMenuBtn) {
+  mainMenuBtn.addEventListener('click', () => {
+    // change this to your real main menu page path
+    window.location.href = '/familygamehub/index.html';
+  });
+}
+
