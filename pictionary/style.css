@@ -1284,4 +1284,8 @@ button {
   }
 }
 
+.top-nav {
+  height: 60px !important;
+}
+
 
