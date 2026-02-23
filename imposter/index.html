@@ -8,15 +8,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   </head>
   <body>
     <div class="top-nav">
       <a href="/familygamehub/index.html" class="nav-left">IMPOSTER</a>
       <div class="nav-right">
-        <a href="#" class="active" id="navStatus">Lobby</a>
+  <button class="nav-home-btn" id="homeBtn">
+  <span class="homeIcon">🏠</span>
+  <span class="homeText">Main Menu</span>
+</button>
+  <span class="nav-divider"></span>
+  <a href="#" class="active" id="navStatus">Lobby</a>
+  <a href="#" id="nav-newparty-btn">New Party</a>
       </div>
     </div>
-
+    
     <main class="page">
       <!-- HOME -->
       <section class="card" id="homeView">

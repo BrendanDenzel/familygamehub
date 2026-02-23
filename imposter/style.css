@@ -1477,3 +1477,174 @@ body::before {
 .kickBtn:active {
   transform: translateY(0px);
 }
+
+.nav-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-home-btn:hover {
+  background: rgba(99,102,241,0.2);
+  border-color: rgba(99,102,241,0.5);
+}
+
+.nav-home-btn span {
+  font-size: 14px;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 8px;
+}
+
+.nav-status {
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #e2e8f0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-home-btn:hover {
+  background: rgba(99,102,241,0.2);
+  border-color: rgba(99,102,241,0.5);
+}
+
+.nav-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Mobile only — shrink Main Menu button */
+@media (max-width: 600px) {
+  .nav-home-btn {
+    padding: 0px 5px;
+    font-size: 1wpx;
+    height: 34px;      /* smaller than desktop */
+    border-radius: 10px;
+  }
+
+  /* --- Top nav: keep on one line + tighter spacing on mobile --- */
+.top-nav {
+  display: flex;
+  align-items: center;      /* vertical centering */
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;      /* vertical centering */
+  gap: 10px;                /* default gap desktop */
+  flex-wrap: nowrap;        /* DON'T wrap to new line */
+  white-space: nowrap;      /* keep text on one line */
+}
+
+/* Divider tighter + smaller */
+.nav-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(226,232,240,0.25);
+  margin: 0 6px;            /* space around the | */
+  flex: 0 0 auto;
+}
+
+/* Make the nav link text behave nicely */
+#navStatus,
+#nav-newparty-btn {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  padding: 6px 8px;         /* clickable but not huge */
+  text-decoration: none;
+}
+
+/* Home button tighter so it doesn't hog space */
+.nav-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;                 /* space between emoji + text */
+  padding: 6px 10px;
+  font-size: 14px;
+  line-height: 1;
+}
+}
+
+/* --- Mobile tightening --- */
+@media (max-width: 520px) {
+  .nav-right {
+    gap: 5px;               /* less space between items */
+  }
+
+  .nav-divider {
+    margin: 0 4px;
+    height: 16px;
+  }
+
+  .nav-home-btn {
+    padding: -20px 10px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  #navStatus,
+  #nav-newparty-btn {
+    font-size: 14px;
+  }
+}
+
+/* Hide emoji ONLY on mobile */
+@media (max-width: 520px) {
+  .homeIcon {
+    display: none;
+  }
+
+  .nav-home-btn {
+    gap: 0; /* remove extra spacing when icon gone */
+  }
+}
+
+.nav-home-btn {
+  transform: translateY(-.25px);
+}
+
+@media (max-width: 520px) {
+.nav-home-btn {
+  transform: translateY(0px);
+}
+}
+
+
+
+
+
+

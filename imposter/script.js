@@ -282,6 +282,7 @@ const firstPlayerName = $("firstPlayerName");
 const revealBox = $("revealBox");
 const imposterNameReveal = $("imposterNameReveal");
 const backToLobbyBtn = $("backToLobbyBtn");
+const newPartyBtn = $("nav-newparty-btn");
 
 const toast = $("toast");
 const homeBtn = $("homeBtn");
@@ -299,6 +300,35 @@ useDefaultBankToggle?.addEventListener("change", async () => {
   });
 });
 
+newPartyBtn?.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  const targetUrl = "/imposter/"; // or "/imposter/index.html" if needed
+
+  // Not in a party? Just go to the imposter home
+  if (!partyCode) {
+    window.location.href = targetUrl;
+    return;
+  }
+
+  // In a lobby/game: use the SAME confirmation modal
+  const ok = await confirmLeaveMatch({
+    title: "Leave current match?",
+    message: "Are you sure you want to leave your current match? You’ll be removed from the party.",
+    confirmText: "Leave",
+    cancelText: "Stay"
+  });
+
+  if (!ok) return;
+
+  try {
+    await leavePartyNow(); // removes them from player list (or closes party if host)
+    window.location.href = targetUrl;
+  } catch (err) {
+    console.error("New Party leave failed:", err);
+    showToast(err?.message || "Could not leave match");
+  }
+});
 
 hintToggle?.addEventListener("change", async () => {
   applyHintToggleLock();
@@ -407,9 +437,138 @@ async function kickPlayer(targetId) {
   showToast("Player kicked.");
 }
 
+// ================================
+// CONFIRM MODAL (Leave / Stay)
+// ================================
+function ensureConfirmModalStyles() {
+  if (document.getElementById("confirmModalStyles")) return;
+
+  const style = document.createElement("style");
+  style.id = "confirmModalStyles";
+  style.textContent = `
+    .confirmOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 18px;
+    }
+    .confirmCard{
+      width: min(420px, 100%);
+      background: rgba(15,23,42,0.98);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    }
+    .confirmTitle{
+      font-weight: 800;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+    .confirmMsg{
+      color: rgba(226,232,240,0.85);
+      font-size: 14px;
+      line-height: 1.4;
+      margin-bottom: 14px;
+    }
+    .confirmRow{
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .confirmRow .btn{
+      min-width: 110px;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function confirmLeaveMatch({
+  title = "Leave match?",
+  message = "Are you sure you want to leave your current match?",
+  confirmText = "Leave",
+  cancelText = "Stay"
+} = {}) {
+  ensureConfirmModalStyles();
+
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "confirmOverlay";
+
+    const card = document.createElement("div");
+    card.className = "confirmCard";
+    card.innerHTML = `
+      <div class="confirmTitle">${title}</div>
+      <div class="confirmMsg">${message}</div>
+      <div class="confirmRow">
+        <button class="btn" data-cancel>${cancelText}</button>
+        <button class="btn danger" data-confirm>${confirmText}</button>
+      </div>
+    `;
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    const cleanup = (val) => {
+      overlay.remove();
+      resolve(val);
+    };
+
+    // Click outside = Stay
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) cleanup(false);
+    });
+
+    // ESC = Stay
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        document.removeEventListener("keydown", onKey);
+        cleanup(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+
+    card.querySelector("[data-cancel]").addEventListener("click", () => {
+      document.removeEventListener("keydown", onKey);
+      cleanup(false);
+    });
+
+    card.querySelector("[data-confirm]").addEventListener("click", () => {
+      document.removeEventListener("keydown", onKey);
+      cleanup(true);
+    });
+  });
+}
+
+
 function partyRef(code) {
   return doc(db, "parties", code);
 }
+
+// ✅ iOS/phone sleep fix: when app returns to foreground, refetch + re-render game
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible") return;
+  if (!partyCode) return;
+
+  try {
+    const snap = await getDoc(partyRef(partyCode));
+    if (!snap.exists()) return;
+
+    lastPartyData = snap.data();
+
+    if (lastPartyData?.started) {
+      renderGame(lastPartyData);
+    }
+  } catch (e) {
+    console.warn("Visibility refresh failed:", e);
+  }
+});
+
 
 function playersRef(code) {
   return collection(db, "parties", code, "players");
@@ -621,15 +780,22 @@ async function refreshPartyUI() {
   applyHostUI(lastPartyData);
 }
 
-// When auth finally arrives, re-apply host UI using the last party snapshot
+// When auth finally arrives, re-apply host UI AND recompute game word/role
 onAuthStateChanged(auth, async (user) => {
   playerId = user?.uid ?? null;
+
   if (partyCode) {
     await refreshPartyUI();
+
+    // ✅ IMPORTANT: recompute the role/word after auth UID is known
+    if (lastPartyData?.started) {
+      renderGame(lastPartyData);
+    }
   } else if (lastPartyData) {
     applyHostUI(lastPartyData);
   }
 });
+
 
 /* ================================
    ROLE TAG (hidden until reveal)
@@ -994,45 +1160,6 @@ copyCodeBtn?.addEventListener("click", async () => {
   showToast("Code copied!");
 });
 
-// Leave (host deletes party; others delete themselves)
-leaveBtn?.addEventListener("click", async () => {
-  try {
-    if (!partyCode || !playerId) return goHomeHard();
-
-    const p = await getDoc(partyRef(partyCode));
-    if (p.exists() && p.data().hostUid === playerId) {
-      await deleteDoc(partyRef(partyCode));
-    } else {
-      await deleteDoc(playerDocRef(partyCode, playerId));
-    }
-
-    goHomeHard();
-  } catch (e) {
-    console.error("Leave failed:", e);
-    showToast(e?.message || "Leave failed");
-  }
-});
-
-// Host start game (word always random)
-startGameBtn?.addEventListener("click", async () => {
-  try {
-    if (!partyCode) return;
-
-    const p = await getDoc(partyRef(partyCode));
-    if (!p.exists()) return;
-
-    if (p.data().hostUid !== playerId) return showToast("Only the host can start.");
-
-    const { getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-    const snap = await getDocs(playersRef(partyCode));
-    const players = snap.docs.map(d => d.data());
-
-    if (players.length < 3) return showToast("Need at least 3 players.");
-
-    // Build the bank from textarea (host-only convenience). If empty/invalid, fall back.
-// Decide which bank to use (default toggle ON uses built-in list)
-const useDefault = !!useDefaultBankToggle?.checked;
-
 // Host: start a new round WITHOUT going back to lobby (keeps fairness + recency)
 startNewRoundBtn?.addEventListener("click", async () => {
   try {
@@ -1132,6 +1259,67 @@ startNewRoundBtn?.addEventListener("click", async () => {
     showToast(e?.message || "Start new round failed");
   }
 });
+
+async function leavePartyNow() {
+  // If we're not actually in a party, nothing to do
+  if (!partyCode) return;
+
+  // Make sure we have auth uid
+  if (!playerId) await ensureAuth();
+
+  // Safely try to leave
+  const p = await getDoc(partyRef(partyCode));
+
+  if (p.exists() && p.data().hostUid === playerId) {
+    // Host deletes the whole party (same as your Leave button)
+    await deleteDoc(partyRef(partyCode));
+  } else {
+    // Non-host deletes their own player doc (removes from player list)
+    await deleteDoc(playerDocRef(partyCode, playerId));
+  }
+
+  // local cleanup
+  goHomeHard();
+}
+
+// Leave (host deletes party; others delete themselves)
+leaveBtn?.addEventListener("click", async () => {
+  try {
+    if (!partyCode || !playerId) return goHomeHard();
+
+    const p = await getDoc(partyRef(partyCode));
+    if (p.exists() && p.data().hostUid === playerId) {
+      await deleteDoc(partyRef(partyCode));
+    } else {
+      await deleteDoc(playerDocRef(partyCode, playerId));
+    }
+
+    goHomeHard();
+  } catch (e) {
+    console.error("Leave failed:", e);
+    showToast(e?.message || "Leave failed");
+  }
+});
+
+// Host start game (word always random)
+startGameBtn?.addEventListener("click", async () => {
+  try {
+    if (!partyCode) return;
+
+    const p = await getDoc(partyRef(partyCode));
+    if (!p.exists()) return;
+
+    if (p.data().hostUid !== playerId) return showToast("Only the host can start.");
+
+    const { getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+    const snap = await getDocs(playersRef(partyCode));
+    const players = snap.docs.map(d => d.data());
+
+    if (players.length < 3) return showToast("Need at least 3 players.");
+
+    // Build the bank from textarea (host-only convenience). If empty/invalid, fall back.
+// Decide which bank to use (default toggle ON uses built-in list)
+const useDefault = !!useDefaultBankToggle?.checked;
 
 let bank = WORD_BANK;
 
@@ -1273,11 +1461,48 @@ backToLobbyBtn?.addEventListener("click", () => {
   setView("lobby");
 });
 
-// Home button
-homeBtn?.addEventListener("click", () => {
-  if (partyCode) return showToast("Leave party to return home.");
-  setView("home");
+
+homeBtn?.addEventListener("click", async () => {
+  // If not in a party, just go to main menu page
+  if (!partyCode) {
+    window.location.href = "/familygamehub/index.html";
+    return;
+  }
+
+  // In a lobby/game: confirm leaving
+  const ok = await confirmLeaveMatch({
+    title: "Leave current match?",
+    message: "Are you sure you want to leave your current match? You’ll be removed from the party.",
+    confirmText: "Leave",
+    cancelText: "Stay"
+  });
+
+  if (!ok) return;
+
+  try {
+    // Leave party properly first (same logic as your Leave button)
+    if (!partyCode || !playerId) {
+      window.location.href = "/familygamehub/index.html";
+      return;
+    }
+
+    const p = await getDoc(partyRef(partyCode));
+    if (p.exists() && p.data().hostUid === playerId) {
+      await deleteDoc(partyRef(partyCode));        // host closes party
+    } else {
+      await deleteDoc(playerDocRef(partyCode, playerId)); // player leaves
+    }
+
+    goHomeHard();
+
+    // Now go to the main menu page
+    window.location.href = "/familygamehub/index.html";
+  } catch (e) {
+    console.error("Home leave failed:", e);
+    showToast(e?.message || "Could not leave match");
+  }
 });
+
 
 /* ================================
    INITIAL
