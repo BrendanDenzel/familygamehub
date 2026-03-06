@@ -335,6 +335,28 @@ body::before {
   font-size: 18px;
 }
 
+.mini.revealMini {
+  background: linear-gradient(135deg, rgba(239,68,68,0.22), rgba(220,38,38,0.18)) !important;
+  border: 1px solid rgba(239,68,68,0.30) !important;
+  box-shadow: 0 8px 24px rgba(239,68,68,0.12) !important;
+}
+
+.mini.revealMini .miniLabel {
+  color: #fecaca !important;
+}
+
+.mini.revealMini .miniValue {
+  color: #ffffff !important;
+}
+
+.mini {
+  min-width: 210px;
+  padding: 14px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
 .revealBox {
   margin: 18px auto 0;
   padding: 18px;
@@ -1662,6 +1684,136 @@ body::before {
 
 }
 
+.leaderboardWrap {
+  margin-top: 18px;
+  width: min(820px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.leaderboardPanel {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.leaderboardTitle {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  text-align: left;
+  margin-left: 5px;
+  margin-top: 2px;
+}
+
+.leaderboardHead,
+.leaderboardRow {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) 140px 140px;
+  gap: 10px;
+  align-items: center;
+}
+
+.leaderboardHead {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 12px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 10px;
+}
+
+.leaderboardList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.leaderboardRow {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.leaderboardPlayer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.leaderboardRank {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  background: rgba(99,102,241,0.18);
+  border: 1px solid rgba(99,102,241,0.28);
+  flex: 0 0 auto;
+}
+
+.leaderboardName {
+  font-weight: 800;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaderboardValue {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+@media (max-width: 700px) {
+  .leaderboardPanel {
+    padding: 12px;
+  }
+
+  .leaderboardHead,
+  .leaderboardRow {
+    grid-template-columns: minmax(0, 1fr) 70px 70px;
+    gap: 6px;
+  }
+
+  .leaderboardHead {
+    font-size: 10px;
+    padding: 0 8px 8px;
+  }
+
+  .leaderboardRow {
+    padding: 10px 8px;
+  }
+
+  .leaderboardPlayer {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .leaderboardName {
+    font-size: 14px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .leaderboardRank {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+    flex: 0 0 26px;
+  }
+
+  .leaderboardValue {
+    font-size: 15px;
+  }
+}
 
 
 

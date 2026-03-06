@@ -110,6 +110,18 @@
       <span class="slider"></span>
     </label>
   </div>
+
+  <div class="switchRow">
+  <div>
+    <div class="switchTitle">Keep Score</div>
+    <div class="switchDesc">If ON, +1 point for the imposter every time they win.</div>
+  </div>
+
+  <label class="switch">
+    <input type="checkbox" id="keepScoreToggle" />
+    <span class="slider"></span>
+  </label>
+  </div>
 </div>
 
 <div id="customBankWrap">
@@ -158,16 +170,18 @@ SUBMARINE | Underwater vehicle"
 </div>
 
           <div class="bigRow">
-            <div class="mini">
-              <div class="miniLabel">First Player</div>
-              <div class="miniValue" id="firstPlayerName">---</div>
-            </div>
-          </div>
 
-          <div class="revealBox hidden" id="revealBox">
-            <div class="revealTitle">IMPOSTER WAS</div>
-            <div class="revealName" id="imposterNameReveal">---</div>
-          </div>
+  <div class="mini">
+    <div class="miniLabel">First Player</div>
+    <div class="miniValue" id="firstPlayerName">---</div>
+  </div>
+
+  <div class="mini revealMini hidden" id="revealBox">
+    <div class="miniLabel">IMPOSTER WAS</div>
+    <div class="miniValue" id="imposterNameReveal">---</div>
+  </div>
+
+</div>
 
           <p class="hint center" id="gameHint">
             Don’t say the word out loud. Discuss, draw, or play however you want — host reveals the imposter when ready.
@@ -178,6 +192,20 @@ SUBMARINE | Underwater vehicle"
   <button class="btn revealBtn" id="showResultsBtn" disabled>Reveal Imposter</button>
   <button class="btn" id="backToLobbyBtn">Back to Lobby</button>
 </div>
+<div class="leaderboardWrap hidden" id="leaderboardWrap">
+  <div class="leaderboardPanel">
+    <div class="leaderboardTitle">Leaderboard</div>
+
+    <div class="leaderboardHead">
+      <div>Player</div>
+      <div>Imposter Wins</div>
+      <div>Imposter Count</div>
+    </div>
+
+    <div class="leaderboardList" id="leaderboardList"></div>
+  </div>
+</div>
+
         </div>
       </section>
     </main>

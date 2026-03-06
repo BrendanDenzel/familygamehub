@@ -254,6 +254,9 @@ const joinPartyBtn = $("joinPartyBtn");
 const partyCodeText = $("partyCodeText");
 const copyCodeBtn = $("copyCodeBtn");
 const leaveBtn = $("leaveBtn");
+const keepScoreToggle = $("keepScoreToggle");
+const leaderboardWrap = $("leaderboardWrap");
+const leaderboardList = $("leaderboardList");
 
 const playersList = $("playersList");
 const hostPanel = $("hostPanel");
@@ -367,6 +370,9 @@ let partyCode = null;
 let playerId = null;     // Firebase auth uid
 let playerName = null;
 let isHost = false;
+let lastRenderedRoundNumber = 0;
+let isRoundSyncing = false;
+let latestPlayers = [];
 
 let unsubParty = null;
 let unsubPlayers = null;
@@ -397,6 +403,160 @@ function setView(name) {
 ================================ */
 function cleanCode(s) {
   return (s || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+}
+
+function askRoundWinner() {
+  ensureConfirmModalStyles();
+
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "confirmOverlay";
+
+    const card = document.createElement("div");
+    card.className = "confirmCard";
+    card.innerHTML = `
+      <div class="confirmTitle">Who won the round?</div>
+      <div class="confirmMsg">Choose the result for the round that just ended.</div>
+      <div class="confirmRow" style="justify-content:center;">
+        <button class="btn primary" data-result="civilians">Civilians</button>
+        <button class="btn danger" data-result="imposter">Imposter</button>
+        <button class="btn" data-result="skip">Don’t Count This Round</button>
+      </div>
+    `;
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    const cleanup = (val) => {
+      overlay.remove();
+      resolve(val);
+    };
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) cleanup("skip");
+    });
+
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        document.removeEventListener("keydown", onKey);
+        cleanup("skip");
+      }
+    };
+    document.addEventListener("keydown", onKey);
+
+    card.querySelectorAll("[data-result]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.removeEventListener("keydown", onKey);
+        cleanup(btn.getAttribute("data-result"));
+      });
+    });
+  });
+}
+
+async function resolvePreviousRoundForScoring(partyData) {
+  const nextScoreStats = { ...(partyData.scoreStats || {}) };
+  const nextImposterStats = { ...(partyData.imposterStats || {}) };
+
+  if (!partyData?.started || !partyData?.imposterId) {
+    return {
+      scoreStats: nextScoreStats,
+      imposterStats: nextImposterStats
+    };
+  }
+
+  const imposterId = partyData.imposterId;
+
+  // Keep score ON = ask host who won
+  if (partyData.keepScoreEnabled) {
+    const result = await askRoundWinner();
+
+    if (result === "skip") {
+      return {
+        scoreStats: nextScoreStats,
+        imposterStats: nextImposterStats
+      };
+    }
+
+    // Count this round for fairness
+    const fair = nextImposterStats[imposterId] || { lastRound: 0, count: 0 };
+    fair.lastRound = partyData.roundNumber || 0;
+    fair.count = (fair.count || 0) + 1;
+    nextImposterStats[imposterId] = fair;
+
+    // Count this round for scoreboard
+    const score = nextScoreStats[imposterId] || { imposterWins: 0, imposterCount: 0 };
+    score.imposterCount = (score.imposterCount || 0) + 1;
+
+    if (result === "imposter") {
+      score.imposterWins = (score.imposterWins || 0) + 1;
+    }
+
+    nextScoreStats[imposterId] = score;
+
+    return {
+      scoreStats: nextScoreStats,
+      imposterStats: nextImposterStats
+    };
+  }
+
+  // Keep score OFF = still auto-count for fairness only
+  const fair = nextImposterStats[imposterId] || { lastRound: 0, count: 0 };
+  fair.lastRound = partyData.roundNumber || 0;
+  fair.count = (fair.count || 0) + 1;
+  nextImposterStats[imposterId] = fair;
+
+  return {
+    scoreStats: nextScoreStats,
+    imposterStats: nextImposterStats
+  };
+}
+
+function updateLeaderboardUI() {
+  if (!lastPartyData || !leaderboardWrap || !leaderboardList) return;
+
+  const keepScoreEnabled = !!lastPartyData.keepScoreEnabled;
+
+  leaderboardWrap.classList.toggle("hidden", !keepScoreEnabled);
+
+  if (!keepScoreEnabled) {
+    leaderboardList.innerHTML = "";
+    return;
+  }
+
+  const scoreStats = lastPartyData.scoreStats || {};
+  const players = [...latestPlayers];
+
+  players.sort((a, b) => {
+    const aStats = scoreStats[a.id] || {};
+    const bStats = scoreStats[b.id] || {};
+
+    const aWins = aStats.imposterWins || 0;
+    const bWins = bStats.imposterWins || 0;
+
+    const aCount = aStats.imposterCount || 0;
+    const bCount = bStats.imposterCount || 0;
+
+    if (bWins !== aWins) return bWins - aWins;
+    if (bCount !== aCount) return bCount - aCount;
+    return (a.name || "").localeCompare(b.name || "");
+  });
+
+  leaderboardList.innerHTML = players.map((p, i) => {
+    const st = scoreStats[p.id] || {};
+    const wins = st.imposterWins || 0;
+    const count = st.imposterCount || 0;
+
+    return `
+      <div class="leaderboardRow">
+        <div class="leaderboardPlayer">
+          <div class="leaderboardRank">${i + 1}</div>
+          <div class="leaderboardName">${escapeHtml(p.name || "Player")}</div>
+        </div>
+        <div class="leaderboardValue">${wins}</div>
+        <div class="leaderboardValue">${count}</div>
+      </div>
+    `;
+  }).join("");
 }
 
 function makeCode(len = 5) {
@@ -544,6 +704,18 @@ function confirmLeaveMatch({
     });
   });
 }
+
+keepScoreToggle?.addEventListener("change", async () => {
+  if (!partyCode || !playerId) return;
+
+  const p = await getDoc(partyRef(partyCode));
+  if (!p.exists()) return;
+  if (p.data().hostUid !== playerId) return;
+
+  await updateDoc(partyRef(partyCode), {
+    keepScoreEnabled: !!keepScoreToggle.checked
+  });
+});
 
 
 function partyRef(code) {
@@ -863,9 +1035,28 @@ function revealWordFor5s() {
 }
 
 if (wordDisplay) {
-  wordDisplay.addEventListener("click", () => {
-    if (!partyCode) return;
-    revealWordFor5s();
+  wordDisplay.addEventListener("click", async () => {
+    if (!partyCode || isRoundSyncing) return;
+
+    try {
+      const snap = await getDoc(partyRef(partyCode));
+      if (!snap.exists()) return;
+
+      const latestParty = snap.data();
+
+      if ((latestParty.roundNumber || 0) !== lastRenderedRoundNumber) {
+        lastPartyData = latestParty;
+        renderGame(latestParty);
+      }
+
+      requestAnimationFrame(() => {
+        isRoundSyncing = false;
+        revealWordFor5s();
+      });
+    } catch (e) {
+      console.warn("Reveal refresh failed:", e);
+      revealWordFor5s();
+    }
   });
 }
 
@@ -947,16 +1138,18 @@ if (playerId && data?.kicked && data.kicked[playerId]) {
   return;
 }
 
-    if (useDefaultBankToggle) useDefaultBankToggle.checked = data.useDefaultBank !== false; // default true
+if (useDefaultBankToggle) useDefaultBankToggle.checked = data.useDefaultBank !== false;
 applyBankUI();
 
-// Sync host toggle UI from party doc (safe for host and non-host; hostPanel hides anyway)
 if (hintToggle) hintToggle.checked = !!data.hintEnabled;
 if (hintOnlyIfImposterStartsToggle) hintOnlyIfImposterStartsToggle.checked = !!data.hintOnlyIfImposterStarts;
+if (keepScoreToggle) keepScoreToggle.checked = !!data.keepScoreEnabled;
+
 applyHintToggleLock();
 
     lastPartyData = data;
     applyHostUI(data);
+    updateLeaderboardUI();
 
     // hide legacy word controls if present
     if (wordInput) wordInput.parentElement?.classList?.add?.("hidden");
@@ -985,11 +1178,18 @@ if (data.started && !shouldStayLobby) {
   });
 
   unsubPlayers = onSnapshot(playersRef(code), async (snap) => {
-    const players = snap.docs.map(d => d.data()).sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
-    const partySnap = await getDoc(partyRef(code));
-    if (!partySnap.exists()) return;
-    renderPlayers(players, partySnap.data().hostUid);
-  });
+  const players = snap.docs
+    .map(d => d.data())
+    .sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
+
+  latestPlayers = players;
+
+  const partySnap = await getDoc(partyRef(code));
+  if (!partySnap.exists()) return;
+
+  renderPlayers(players, partySnap.data().hostUid);
+  updateLeaderboardUI();
+});
 
   // force a UI refresh (helps when snapshot ran before auth uid existed)
   refreshPartyUI().catch(() => {});
@@ -999,39 +1199,35 @@ if (data.started && !shouldStayLobby) {
    GAME RENDER
 ================================ */
 function renderGame(party) {
+  isRoundSyncing = true;
+  lastRenderedRoundNumber = party.roundNumber || 0;
+
   setRevealButtonVisible(isHost);
   const isImposterLocal = party.imposterId === playerId;
 
-  // Hide role initially
   updateRoleTag(isImposterLocal, false);
 
-  // Store the real word for THIS player
   currentRealWord = isImposterLocal ? "IMPOSTER" : (party.word || "---");
 
-    // ✅ Hint logic (compute now, but DON'T show until tap-to-reveal)
   currentHintShouldShow = false;
   currentHintText = party.wordHint || "No hint provided.";
 
   if (party.hintEnabled && isImposterLocal) {
     if (party.hintOnlyIfImposterStarts) {
-      // only show hint if the imposter is also the first player
       currentHintShouldShow = party.firstPlayerId === party.imposterId;
     } else {
       currentHintShouldShow = true;
     }
   }
 
-  // IMPORTANT: hide hint by default when entering the game screen
   setHintBoxVisible(false);
 
-  // Set it, then cover
   if (wordDisplay) {
     wordDisplay.textContent = currentRealWord;
     wordDisplay.setAttribute("data-word", currentRealWord);
   }
   coverWord();
 
-  // First player name
   if (party.firstPlayerId && firstPlayerName) {
     getDoc(playerDocRef(partyCode, party.firstPlayerId)).then(s => {
       firstPlayerName.textContent = s.exists() ? s.data().name : "---";
@@ -1040,21 +1236,26 @@ function renderGame(party) {
     firstPlayerName.textContent = "---";
   }
 
-  // Reveal box
-  if (!revealBox) return;
-
-  if (party.revealed) {
-    revealBox.classList.remove("hidden");
-    if (party.imposterId && imposterNameReveal) {
-      getDoc(playerDocRef(partyCode, party.imposterId)).then(s => {
-        imposterNameReveal.textContent = s.exists() ? s.data().name : "UNKNOWN";
-      });
-    } else if (imposterNameReveal) {
-      imposterNameReveal.textContent = "UNKNOWN";
+  if (revealBox) {
+    if (party.revealed) {
+      revealBox.classList.remove("hidden");
+      if (party.imposterId && imposterNameReveal) {
+        getDoc(playerDocRef(partyCode, party.imposterId)).then(s => {
+          imposterNameReveal.textContent = s.exists() ? s.data().name : "UNKNOWN";
+        });
+      } else if (imposterNameReveal) {
+        imposterNameReveal.textContent = "UNKNOWN";
+      }
+    } else {
+      revealBox.classList.add("hidden");
     }
-  } else {
-    revealBox.classList.add("hidden");
   }
+
+  requestAnimationFrame(() => {
+    isRoundSyncing = false;
+  });
+
+  updateLeaderboardUI();
 }
 
 /* ================================
@@ -1077,7 +1278,7 @@ createPartyBtn?.addEventListener("click", async () => {
       code = makeCode(5);
     }
 
-   const party = {
+ const party = {
   code,
   hostUid: playerId,
   createdAt: Date.now(),
@@ -1090,11 +1291,12 @@ createPartyBtn?.addEventListener("click", async () => {
   useDefaultBank: true,
   hintEnabled: false,
   hintOnlyIfImposterStarts: false,
+  keepScoreEnabled: false,
+  scoreStats: {},
 
-  // NEW: fairness memory (persists across rounds)
   roundNumber: 0,
-  imposterStats: {},     // { [playerId]: { lastRound: number, count: number } }
-  firstPlayerStats: {}   // { [playerId]: { lastRound: number, count: number } }
+  imposterStats: {},
+  firstPlayerStats: {}
 };
 
     await setDoc(partyRef(code), party);
@@ -1160,7 +1362,6 @@ copyCodeBtn?.addEventListener("click", async () => {
   showToast("Code copied!");
 });
 
-// Host: start a new round WITHOUT going back to lobby (keeps fairness + recency)
 startNewRoundBtn?.addEventListener("click", async () => {
   try {
     if (!partyCode) return;
@@ -1171,15 +1372,19 @@ startNewRoundBtn?.addEventListener("click", async () => {
     const partyData = p.data() || {};
     if (partyData.hostUid !== playerId) return showToast("Only the host can start a new round.");
 
-    // Pull players
     const { getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
     const snap = await getDocs(playersRef(partyCode));
     const players = snap.docs.map(d => d.data()).filter(Boolean);
 
     if (players.length < 3) return showToast("Need at least 3 players.");
 
-    // Bank: use saved setting from party doc (fallback to current toggle)
-    const useDefault = (partyData.useDefaultBank !== false); // default true
+    // 1) Resolve the previous round FIRST
+    const resolved = await resolvePreviousRoundForScoring(partyData);
+    const resolvedImposterStats = resolved.imposterStats || {};
+    const resolvedScoreStats = resolved.scoreStats || {};
+
+    // 2) Decide bank
+    const useDefault = (partyData.useDefaultBank !== false);
     let bank = WORD_BANK;
 
     if (!useDefault) {
@@ -1187,23 +1392,25 @@ startNewRoundBtn?.addEventListener("click", async () => {
       if (customBank.length) bank = customBank;
     }
 
-    // Word with recency
+    // 3) Pick word
     const recentWords = partyData.recentWords || [];
     const seed = (partyData.createdAt || Date.now()) + Date.now();
     const pick = pickWordWithRecency(bank, recentWords, seed);
     const word = pick.word;
     const wordHint = pick.hint || "";
-
     const nextRecentWords = [word, ...recentWords.filter(w => w !== word)].slice(0, 25);
 
-    // Fairness stats (persisted)
+    // 4) Round number
     const nextRound = (partyData.roundNumber || 0) + 1;
-    const imposterStats = partyData.imposterStats || {};
-    const firstPlayerStats = partyData.firstPlayerStats || {};
 
+    // 5) First-player fairness stays as before
+    const firstPlayerStats = { ...(partyData.firstPlayerStats || {}) };
+
+    // 6) Pick imposter using RESOLVED imposter stats
     const imposter = weightedPick(players, (pl) => {
-      const st = imposterStats[pl.id] || {};
+      const st = resolvedImposterStats[pl.id] || {};
       const wasLastRound = (st.lastRound || 0) === (nextRound - 1);
+
       return computeWeight({
         roundNum: nextRound,
         lastRound: st.lastRound || 0,
@@ -1215,6 +1422,7 @@ startNewRoundBtn?.addEventListener("click", async () => {
     const first = weightedPick(players, (pl) => {
       const st = firstPlayerStats[pl.id] || {};
       const wasLastRound = (st.lastRound || 0) === (nextRound - 1);
+
       return computeWeight({
         roundNum: nextRound,
         lastRound: st.lastRound || 0,
@@ -1223,14 +1431,13 @@ startNewRoundBtn?.addEventListener("click", async () => {
       });
     });
 
-    // Update stats
-    const impSt = imposterStats[imposter.id] || { lastRound: 0, count: 0 };
-    imposterStats[imposter.id] = { lastRound: nextRound, count: (impSt.count || 0) + 1 };
-
+    // Count first player immediately (same as your current behavior)
     const fpSt = firstPlayerStats[first.id] || { lastRound: 0, count: 0 };
-    firstPlayerStats[first.id] = { lastRound: nextRound, count: (fpSt.count || 0) + 1 };
+    firstPlayerStats[first.id] = {
+      lastRound: nextRound,
+      count: (fpSt.count || 0) + 1
+    };
 
-    // Keep game "started" so everyone stays in game view
     lobbyOverride = false;
 
     await updateDoc(partyRef(partyCode), {
@@ -1241,15 +1448,15 @@ startNewRoundBtn?.addEventListener("click", async () => {
       imposterId: imposter.id,
       firstPlayerId: first.id,
 
-      // Keep the current settings from the party doc
       hintEnabled: !!partyData.hintEnabled,
       hintOnlyIfImposterStarts: !!partyData.hintOnlyIfImposterStarts,
       useDefaultBank: !!useDefault,
+      keepScoreEnabled: !!partyData.keepScoreEnabled,
 
-      // Persisted memory
       roundNumber: nextRound,
-      imposterStats,
+      imposterStats: resolvedImposterStats,
       firstPlayerStats,
+      scoreStats: resolvedScoreStats,
       recentWords: nextRecentWords
     });
 
@@ -1286,6 +1493,7 @@ async function leavePartyNow() {
 leaveBtn?.addEventListener("click", async () => {
   try {
     if (!partyCode || !playerId) return goHomeHard();
+    latestPlayers = [];
 
     const p = await getDoc(partyRef(partyCode));
     if (p.exists() && p.data().hostUid === playerId) {
@@ -1373,10 +1581,6 @@ const first = weightedPick(players, (pl) => {
   });
 });
 
-// update stats
-const impSt = imposterStats[imposter.id] || { lastRound: 0, count: 0 };
-imposterStats[imposter.id] = { lastRound: nextRound, count: (impSt.count || 0) + 1 };
-
 const fpSt = firstPlayerStats[first.id] || { lastRound: 0, count: 0 };
 firstPlayerStats[first.id] = { lastRound: nextRound, count: (fpSt.count || 0) + 1 };
 
@@ -1390,6 +1594,7 @@ await updateDoc(partyRef(partyCode), {
   wordHint,
   imposterId: imposter.id,
   firstPlayerId: first.id,
+  keepScoreEnabled: !!keepScoreToggle?.checked,
 
   hintEnabled: !!hintToggle?.checked,
   hintOnlyIfImposterStarts: !!hintOnlyIfImposterStartsToggle?.checked,
@@ -1427,7 +1632,6 @@ showResultsBtn?.addEventListener("click", async () => {
   }
 });
 
-// Host reset round
 resetPartyBtn?.addEventListener("click", async () => {
   try {
     if (!partyCode) return;
@@ -1442,11 +1646,17 @@ resetPartyBtn?.addEventListener("click", async () => {
       started: false,
       revealed: false,
       word: "",
+      wordHint: "",
       imposterId: "",
-      firstPlayerId: ""
+      firstPlayerId: "",
+      roundNumber: 0,
+      imposterStats: {},
+      firstPlayerStats: {},
+      recentWords: [],
+      scoreStats: {}
     });
 
-    showToast("Round reset.");
+    showToast("Party fully reset.");
     setView("lobby");
   } catch (e) {
     console.error("Reset failed:", e);
